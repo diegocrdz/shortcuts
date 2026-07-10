@@ -12,13 +12,23 @@
   "app": {
     "windows": [
       {
-        "title": "shortcuts",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "width": 720,
+        "height": 480,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "resizable": false
       }
     ],
     "security": {
       "csp": null
+    },
+    "trayIcon": {
+      "iconPath": "icons/icon.png",
+      "tooltip": "Shortcuts"
     }
   },
   "bundle": {
