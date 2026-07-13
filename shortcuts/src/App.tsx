@@ -1,49 +1,36 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useEffect } from "react";
+import { getCurrentWindow, currentMonitor, LogicalPosition } from "@tauri-apps/api/window";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  useEffect(() => {
+  async function positionWindow() {
+      const win = getCurrentWindow();
+      const monitor = await currentMonitor();
+      if (!monitor) return;
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+      const scale = monitor.scaleFactor;
+      const screenW = monitor.size.width / scale;
+      const screenH = monitor.size.height / scale;
+
+      const winSize = await win.outerSize();
+      const winW = winSize.width / scale;
+      const winH = winSize.height / scale;
+
+      const taskbarHeight = 48;
+      const margin = 12;
+
+      const x = (screenW - winW) / 2; // centrado horizontal
+      const y = screenH - winH - margin - taskbarHeight;
+
+      await win.setPosition(new LogicalPosition(x, y));
+      await win.show();
+    }
+    positionWindow();
+  }, []);
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
+    <main className="bg-card-foreground/60 h-full w-full p-4">
+      
     </main>
   );
 }

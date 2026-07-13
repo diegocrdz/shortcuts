@@ -1,7 +1,7 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
 use tauri::{Manager, WindowEvent};
-use tauri::tray::{TrayIconBuilder, TrayIconEvent, MouseButton, MouseButtonState};
+use std::time::Duration;
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -18,35 +18,27 @@ pub fn run() {
             // Get the main window
             let window = app.get_webview_window("main").unwrap();
 
-            // Hide the window when it loses focus
+            // Apply acrylic effect on Windows
+            #[cfg(target_os = "windows")]
+            {
+                use window_vibrancy::apply_acrylic;
+                let _ = apply_acrylic(&window, Some((18, 18, 18, 80)));
+            }
+
+            // Minimize when it loses focus
             let window_for_blur = window.clone();
             window.on_window_event(move |event| {
                 if let WindowEvent::Focused(false) = event {
-                    let _ = window_for_blur.hide();
+                    let window_check = window_for_blur.clone();
+                    // Delay minimization to avoid immediate minimize
+                    tauri::async_runtime::spawn(async move {
+                        tokio::time::sleep(Duration::from_millis(150)).await;
+                        if !window_check.is_focused().unwrap_or(true) {
+                            let _ = window_check.minimize();
+                        }
+                    });
                 }
             });
-
-            // Toggle the window visibility when the tray icon is clicked
-            let window_for_tray = window.clone();
-            TrayIconBuilder::new()
-                .icon(app.default_window_icon().unwrap().clone())
-                .tooltip("Shortcuts")
-                .on_tray_icon_event(move |_tray, event| {
-                    if let TrayIconEvent::Click {
-                        button: MouseButton::Left,
-                        button_state: MouseButtonState::Up,
-                        ..
-                    } = event
-                    {
-                        if window_for_tray.is_visible().unwrap_or(false) {
-                            let _ = window_for_tray.hide();
-                        } else {
-                            let _ = window_for_tray.show();
-                            let _ = window_for_tray.set_focus();
-                        }
-                    }
-                })
-                .build(app)?;
 
             Ok(())
         })
