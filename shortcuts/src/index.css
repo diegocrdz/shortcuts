@@ -10,6 +10,11 @@ html, body, #root {
   background: transparent;
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--foreground) 30%, transparent) transparent;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
