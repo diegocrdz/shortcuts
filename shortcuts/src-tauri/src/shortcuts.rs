@@ -10,6 +10,15 @@ use windows_icons::get_icon_base64_by_path;
 use base64::{Engine as _, engine::general_purpose};
 use win32_version_info::VersionInfo;
 
+pub const SOURCE_MANUAL: &str = "manual";
+pub const SOURCE_STEAM: &str = "steam";
+pub const SOURCE_EPIC: &str = "epic";
+pub const SOURCE_RIOT: &str = "riot";
+
+pub const CATEGORY_LAUNCHERS: &str = "launchers";
+pub const CATEGORY_GAMES: &str = "games";
+pub const CATEGORY_OTHERS: &str = "others";
+
 // Shortcut struct
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Shortcut {
@@ -18,10 +27,49 @@ pub struct Shortcut {
     pub target: String, // Route to .exe file or URI
     pub icon_path: Option<String>,
     pub args: Option<String>, // Optional arguments for the target
-    pub source: String,       // "manual" | "steam" | "epic"
+    pub source: String,       // "manual" | "steam" | "epic" | "riot"
     pub is_favorite: bool,
     pub tags: Vec<String>, // Tags for categorization
-    pub category: String, // "launcher" | "game" | "other"
+    pub category: String, // "launchers" | "games" | "others"
+}
+
+pub fn build_shortcut(
+    id: impl Into<String>,
+    name: impl Into<String>,
+    target: impl Into<String>,
+    args: Option<String>,
+    source: impl Into<String>,
+    category: impl Into<String>,
+) -> Shortcut {
+    Shortcut {
+        id: id.into(),
+        name: name.into(),
+        target: target.into(),
+        icon_path: None,
+        args,
+        source: source.into(),
+        is_favorite: false,
+        tags: vec![],
+        category: category.into(),
+    }
+}
+
+pub fn launcher_shortcut(
+    id: impl Into<String>,
+    name: impl Into<String>,
+    target: impl Into<String>,
+    source: impl Into<String>,
+) -> Shortcut {
+    build_shortcut(id, name, target, None, source, CATEGORY_LAUNCHERS)
+}
+
+pub fn game_shortcut(
+    id: impl Into<String>,
+    name: impl Into<String>,
+    target: impl Into<String>,
+    source: impl Into<String>,
+) -> Shortcut {
+    build_shortcut(id, name, target, None, source, CATEGORY_GAMES)
 }
 
 // Function to get the path to the shortcuts configuration file
@@ -77,7 +125,7 @@ pub fn create_shortcut(app: AppHandle, mut shortcut: Shortcut) -> Result<Vec<Sho
         return Ok(list);
     }
 
-    if shortcut.source == "manual" && shortcut.icon_path.is_none() {
+    if shortcut.source == SOURCE_MANUAL && shortcut.icon_path.is_none() {
         shortcut.icon_path = extract_and_save_icon(&app, &shortcut.target, &shortcut.id);
     }
 

@@ -3,6 +3,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getCurrentWindow, currentMonitor, LogicalPosition } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { Shortcut } from "@/types";
@@ -46,6 +47,7 @@ export default function Dashboard() {
     const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
     const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const navigate = useNavigate();
 
     const visibleShortcuts = shortcuts
         // Filter by active tab
@@ -79,7 +81,7 @@ export default function Dashboard() {
             const taskbarHeight = 48;
             const margin = 12;
             
-            const x = (screenW - winW) / 2; // centrado horizontal
+            const x = (screenW - winW) / 2;
             const y = screenH - winH - margin - taskbarHeight;
             
             await win.setPosition(new LogicalPosition(x, y));
@@ -97,7 +99,7 @@ export default function Dashboard() {
             multiple: false,
             filters: [{ name: "Ejecutable", extensions: ["exe"] }],
         });
-        if (typeof selected !== "string") return; // usuario canceló
+        if (typeof selected !== "string") return;
         
         const fallbackName = selected.split("\\").pop()?.replace(/\.exe$/i, "") ?? selected;
         const friendlyName = await invoke<string | null>("get_exe_friendly_name", { exePath: selected });
@@ -162,8 +164,8 @@ export default function Dashboard() {
     
     return (
         <div className="flex flex-col h-full">
+            {/* Header */}
             <div className="flex flex-col gap-8">
-                {/* Header */}
                 <div className="flex justify-between items-center gap-2 h-8 px-8 pt-8">
                     <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
                     <Button onClick={handleScanGames} variant="outline" size="icon">
@@ -221,13 +223,15 @@ export default function Dashboard() {
             </div>
             
             {/* Footer */}
-            <div className="flex justify-between items-center gap-4 h-8 bg-background/50 p-8">
+            <div className="flex justify-between items-center gap-4 h-8 bg-background/30 p-8">
                 <img src="icon.png" alt="Logo" className="h-7 w-7" />
                 <div className="space-x-2">
-                    <Button onClick={handleScanGames} variant="outline" size="icon">
-                        <Coffee />
+                    <Button variant="outline" size="icon">
+                        <a href="https://buymeacoffee.com/diego_cordova" target="_blank">
+                            <Coffee />
+                        </a>
                     </Button>
-                    <Button onClick={handleScanGames} variant="outline" size="icon">
+                    <Button onClick={() => navigate("/settings")} variant="outline" size="icon">
                         <Settings />
                     </Button>
                 </div>

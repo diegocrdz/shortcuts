@@ -15,3 +15,5 @@ export interface Tag {
   name: string;
   color: string;
 }
+
+export type Theme = "light" | "dark" | "system";

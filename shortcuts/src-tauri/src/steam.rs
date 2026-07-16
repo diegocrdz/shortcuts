@@ -1,10 +1,11 @@
 /* 
- * Scan and detect steam launcher games on the system
+ * Scan and detect steam games on the system
  */
 
-use crate::shortcuts::Shortcut;
+use crate::shortcuts::{game_shortcut, launcher_shortcut, Shortcut, SOURCE_STEAM};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
+use std::path::Path;
 
 /// Extract the value of a key from a VDF (Valve Data Format) string
 fn vdf_value(content: &str, key: &str) -> Option<String> {
@@ -46,17 +47,12 @@ pub fn scan_steam() -> Vec<Shortcut> {
     let launcher = steam_path.join("Steam.exe");
 
     if launcher.exists() {
-        results.push(Shortcut {
-            id: "steam".to_string(),
-            name: "Steam".to_string(),
-            target: launcher.to_string_lossy().to_string(),
-            args: None,
-            source: "steam".to_string(),
-            is_favorite: false,
-            tags: vec![],
-            icon_path: None,
-            category: "launchers".to_string(),
-        });
+        results.push(launcher_shortcut(
+            "steam",
+            "Steam",
+            launcher.to_string_lossy().to_string(),
+            SOURCE_STEAM,
+        ));
     }
 
     // Steam games
@@ -73,17 +69,12 @@ pub fn scan_steam() -> Vec<Shortcut> {
             let (Some(name), Some(appid)) = (vdf_value(&content, "name"), vdf_value(&content, "appid")) else { continue; };
 
             // Create shortcuts
-            results.push(Shortcut {
-                id: format!("steam-{}", appid),
+            results.push(game_shortcut(
+                format!("steam-{}", appid),
                 name,
-                target: format!("steam://rungameid/{}", appid),
-                args: None,
-                source: "steam".to_string(),
-                is_favorite: false,
-                tags: vec![],
-                icon_path: None,
-                category: "games".to_string(),
-            });
+                format!("steam://rungameid/{}", appid),
+                SOURCE_STEAM,
+            ));
         }
     }
     results

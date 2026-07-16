@@ -2,7 +2,7 @@
  * Scan and detect epic launcher games on the system
  */
 
-use crate::shortcuts::Shortcut;
+use crate::shortcuts::{game_shortcut, launcher_shortcut, Shortcut, SOURCE_EPIC};
 use serde::Deserialize;
 use std::path::PathBuf;
 use std::fs;
@@ -45,17 +45,12 @@ pub fn scan_epic() -> Vec<Shortcut> {
         let launcher = epic_path.join("EpicGamesLauncher.exe");
 
         if launcher.exists() {
-            results.push(Shortcut {
-                id: "launcher-epic".to_string(),
-                name: "Epic Games".to_string(),
-                target: launcher.to_string_lossy().to_string(),
-                args: None,
-                source: "epic".to_string(),
-                is_favorite: false,
-                tags: vec![],
-                icon_path: None,
-                category: "launcher".to_string(),
-            });
+            results.push(launcher_shortcut(
+                "launcher-epic",
+                "Epic Games",
+                launcher.to_string_lossy().to_string(),
+                SOURCE_EPIC,
+            ));
         }
     }
 
@@ -83,17 +78,12 @@ pub fn scan_epic() -> Vec<Shortcut> {
             _ => format!("com.epicgames.launcher://apps/{}?action=launch&silent=true", app_name),
         };
 
-        results.push(Shortcut {
-            id: format!("epic-{}", app_name),
+        results.push(game_shortcut(
+            format!("epic-{}", app_name),
             name,
             target,
-            args: None,
-            source: "epic".to_string(),
-            is_favorite: false,
-            tags: vec![],
-            icon_path: None,
-            category: "games".to_string(),
-        });
+            SOURCE_EPIC,
+        ));
     }
     results
 }
