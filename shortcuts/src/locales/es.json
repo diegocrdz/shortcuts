@@ -1,0 +1,63 @@
+{
+    "shortcuts": {
+        "open": "Abrir",
+        "favorite": "Favorito",
+        "tags": "Etiquetas",
+        "noTags": "Sin etiquetas",
+        "category": "Mover",
+        "delete": "Eliminar",
+        "categories": {
+            "all": "Todos",
+            "favourites": "Favoritos",
+            "launchers": "Launchers",
+            "games": "Juegos",
+            "others": "Otros"
+        },
+        "actions": {
+            "launching": "Abriendo",
+            "launched": "Abierto",
+            "launchError": "Error al abrir"
+        }
+    },
+    "tags": {
+        "create": "Agregar",
+        "delete": "Eliminar",
+        "name": "Nombre",
+        "namePlaceholder": "Nombre de la etiqueta",
+        "color": "Color"
+    },
+    "searchBar": {
+        "placeholder": "Buscar atajos..."
+    },
+    "settings": {
+        "title": "Configuración",
+        "description": "Configuración general de la aplicación.",
+        "tabs": {
+            "general": "General"
+        },
+        "donate": "Si te gusta la aplicación, considera donar un café.",
+        "theme": "Tema",
+        "themeOptions": {
+            "light": "Claro",
+            "dark": "Oscuro",
+            "system": "Sistema"
+        },
+        "language": "Idioma",
+        "languageOptions": {
+            "en": "Inglés",
+            "es": "Español"
+        },
+        "updateInterval": "Intervalo de actualización",
+        "updateIntervalOptions": {
+            "1": "1 hora",
+            "6": "6 horas",
+            "12": "12 horas",
+            "24": "24 horas"
+        },
+        "deleteData": "Eliminar datos",
+        "deleteDataConfirmTitle": "¿Eliminar datos?",
+        "deleteDataConfirmDescription": "Esta acción eliminará todos los datos de la aplicación y reestablecerá la configuración a los valores predeterminados. Esta acción no se puede deshacer.",
+        "cancel": "Cancelar",
+        "dataDeleted": "Datos eliminados"
+    }
+}

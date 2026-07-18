@@ -6,7 +6,9 @@ import SettingsPage from "@/components/settings/SettingsPage";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner"
 import { useSettings } from "@/contexts/SettingsContext";
+import { useTranslation } from "react-i18next";
 import {
     TrashIcon,
 } from "lucide-react";
@@ -31,39 +33,48 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-const THEME_OPTIONS = [
-    { value: "light", label: "Claro" },
-    { value: "dark", label: "Oscuro" },
-    { value: "system", label: "Sistema" },
-];
-
-const LANG_OPTIONS = [
-    { value: "en", label: "Inglés" },
-    { value: "es", label: "Español" },
-];
-
-const UPDATE_INTERVAL_OPTIONS = [
-    { value: 1, label: "1 hora" },
-    { value: 6, label: "6 horas" },
-    { value: 12, label: "12 horas" },
-    { value: 24, label: "24 horas" },
-];
-
 export default function GeneralSettings() {
+    const { t } = useTranslation();
     const [resetOpen, setResetOpen] = useState(false);
     const { settings, updateSettings, resetSettings } = useSettings();
 
+    // Constants
+    const THEME_OPTIONS = [
+        { value: "light", label: t("settings.themeOptions.light") },
+        { value: "dark", label: t("settings.themeOptions.dark") },
+        { value: "system", label: t("settings.themeOptions.system") },
+    ];
+
+    const LANG_OPTIONS = [
+        { value: "en", label: t("settings.languageOptions.en") },
+        { value: "es", label: t("settings.languageOptions.es") },
+    ];
+
+    const UPDATE_INTERVAL_OPTIONS = [
+        { value: 1, label: t("settings.updateIntervalOptions.1") },
+        { value: 6, label: t("settings.updateIntervalOptions.6") },
+        { value: 12, label: t("settings.updateIntervalOptions.12") },
+        { value: 24, label: t("settings.updateIntervalOptions.24") },
+    ];
+
+    // Reset settings
+    async function handleReset() {
+        setResetOpen(false);
+        await resetSettings();
+        toast.success(toast.success(t("settings.dataDeleted")));
+    }
+
     return (
         <SettingsPage
-            name="General"
-            description="Configuración general de la aplicación."
+            name={t("settings.tabs.general")}
+            description={t("settings.description")}
         >
             <div className="flex flex-col gap-8">
                 {/* Suggestions */}
                 <a href="https://buymeacoffee.com/diego_cordova" target="_blank">
-                    <div className="flex gap-4 items-center bg-yellow-300/80 p-4 rounded-md">
-                        <p className="text-secondary font-semibold text-sm">
-                            Si te gusta la aplicación, considera donar un café.
+                    <div className="flex gap-4 items-center bg-yellow-300/40 p-4 rounded-md">
+                        <p className="font-semibold text-sm">
+                            {t("settings.donate")}
                         </p>
                         <img src="buy-me-a-coffee-logo.png" alt="Buy Me A Coffee" className="h-16 w-auto" />
                     </div>
@@ -71,7 +82,7 @@ export default function GeneralSettings() {
 
                 {/* Theme */}
                 <div className="flex flex-col gap-2">
-                    <Label htmlFor="theme">Tema</Label>
+                    <Label htmlFor="theme">{t("settings.theme")}</Label>
                     <Select
                         items={THEME_OPTIONS}
                         value={settings.theme}
@@ -96,7 +107,7 @@ export default function GeneralSettings() {
 
                 {/* Language */}
                 <div className="flex flex-col gap-2">
-                    <Label htmlFor="theme">Idioma</Label>
+                    <Label htmlFor="language">{t("settings.language")}</Label>
                     <Select
                         items={LANG_OPTIONS}
                         value={settings.language}
@@ -121,7 +132,7 @@ export default function GeneralSettings() {
 
                 {/* Update Interval */}
                 <div className="flex flex-col gap-2">
-                    <Label htmlFor="theme">Intervalo de actualización</Label>
+                    <Label htmlFor="updateInterval">{t("settings.updateInterval")}</Label>
                     <Select
                         items={UPDATE_INTERVAL_OPTIONS}
                         value={settings.update_interval}
@@ -151,7 +162,7 @@ export default function GeneralSettings() {
                             render={
                                 <Button variant="destructive" className="w-full max-w-1/2">
                                     <TrashIcon />
-                                    Reestablecer configuración
+                                    {t("settings.deleteData")}
                                 </Button>
                             }
                         />
@@ -161,22 +172,19 @@ export default function GeneralSettings() {
                                     <TrashIcon />
                                 </AlertDialogMedia>
                                 <AlertDialogTitle>
-                                    ¿Reestablecer la configuración?
+                                    {t("settings.deleteDataConfirmTitle")}
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    Esta acción reestablecerá todas las configuraciones a sus valores predeterminados. No se puede deshacer.
+                                    {t("settings.deleteDataConfirmDescription")}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel variant="outline">Cancelar</AlertDialogCancel>
+                                <AlertDialogCancel variant="outline">{t("settings.cancel")}</AlertDialogCancel>
                                 <AlertDialogAction
                                     variant="destructive"
-                                    onClick={async () => {
-                                        await resetSettings();
-                                        setResetOpen(false);
-                                    }}
+                                    onClick={handleReset}
                                 >
-                                    Reestablecer
+                                    {t("settings.deleteData")}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

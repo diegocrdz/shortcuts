@@ -2,52 +2,55 @@
  * Dashboard that displays shortcuts, tags and search functionalities.
  */
 
+// React
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
+// Tauri
 import { getCurrentWindow, currentMonitor, LogicalPosition } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
+
+// Types
 import { Shortcut } from "@/types";
 import { Tag } from "@/types";
-import { open } from "@tauri-apps/plugin-dialog";
+
+// Components
 import ShortcutGrid from "@/components/shortcuts/ShortcutGrid";
 import SearchBar from "@/components/SearchBar";
-import { Button } from "@/components/ui/button";
 import TagBadge from "@/components/tags/TagBadge";
 import AddTag from "@/components/tags/AddTag";
-import {
-    Tabs,
-    TabsList,
-    TabsTrigger,
-} from "@/components/ui/tabs"
-import {
-    RotateCcw,
-    Coffee,
-    Plus,
-    Settings,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-const CATEGORY_LABELS: Record<Shortcut["category"], string> = {
-  launchers: "Launchers",
-  games: "Juegos",
-  others: "Otros",
-};
+// Icons
+import { RotateCcw, Plus, Settings } from "lucide-react";
 
 function groupByCategory(list: Shortcut[]): [Shortcut["category"], Shortcut[]][] {
-  const groups: Record<string, Shortcut[]> = { launchers: [], games: [], others: [] };
-  for (const s of list) {
-    groups[s.category]?.push(s);
-  }
-  return (Object.entries(groups) as [Shortcut["category"], Shortcut[]][])
-    .filter(([, items]) => items.length > 0);
+    const groups: Record<string, Shortcut[]> = { launchers: [], games: [], others: [] };
+    for (const s of list) {
+        groups[s.category]?.push(s);
+    }
+    return (Object.entries(groups) as [Shortcut["category"], Shortcut[]][])
+        .filter(([, items]) => items.length > 0);
 }
 
 export default function Dashboard() {
+    const { t } = useTranslation();
     const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
     const [tags, setTags] = useState<Tag[]>([]);
     const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
     const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
+
+    const CATEGORY_LABELS: Record<Shortcut["category"], string> = {
+        launchers: t("shortcuts.categories.launchers"),
+        games: t("shortcuts.categories.games"),
+        others: t("shortcuts.categories.others"),
+    };
 
     const visibleShortcuts = shortcuts
         // Filter by active tab
@@ -91,8 +94,19 @@ export default function Dashboard() {
     }, []);
     
     // Shortcut functions
-    async function launchShortcut(shortcut: Shortcut) {
-        await invoke("launch_shortcut", { shortcut });
+    function launchShortcut(shortcut: Shortcut) {
+        // Artificial delay for the toast
+        const minDelay = new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Launch the shortcut and show a toast notification
+        const launch = Promise.all([invoke("launch_shortcut", { shortcut }), minDelay])
+            .then(([result]) => result);
+
+        toast.promise(launch, {
+            loading: `${t("shortcuts.actions.launching")} ${shortcut.name}...`,
+            success: `${t("shortcuts.actions.launched")} ${shortcut.name}.`,
+            error: `${t("shortcuts.actions.launch_failed")} ${shortcut.name}.`,
+        });
     }
     async function createShortcut() {
         const selected = await open({
@@ -165,31 +179,28 @@ export default function Dashboard() {
     return (
         <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="flex flex-col gap-8">
-                <div className="flex justify-between items-center gap-2 h-8 px-8 pt-8">
+            <div className="flex flex-col gap-8 p-8">
+                <div className="flex justify-between items-center gap-2">
                     <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
-                    <Button onClick={handleScanGames} variant="outline" size="icon">
-                        <RotateCcw />
-                    </Button>
                     <Button onClick={createShortcut} variant="outline" size="icon">
                         <Plus />
                     </Button>
                 </div>
                 
-                <div className="space-y-4 px-8" >
+                <div className="space-y-4" >
                     {/* Tabs */}
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
                         <TabsList className="w-full bg-primary/10">
-                            <TabsTrigger value="all">Todos</TabsTrigger>
-                            <TabsTrigger value="favourites">Favoritos</TabsTrigger>
-                            <TabsTrigger value="launchers">Launchers</TabsTrigger>
-                            <TabsTrigger value="games">Juegos</TabsTrigger>
-                            <TabsTrigger value="others">Otros</TabsTrigger>
+                            <TabsTrigger value="all">{t("shortcuts.categories.all")}</TabsTrigger>
+                            <TabsTrigger value="favourites">{t("shortcuts.categories.favourites")}</TabsTrigger>
+                            <TabsTrigger value="launchers">{t("shortcuts.categories.launchers")}</TabsTrigger>
+                            <TabsTrigger value="games">{t("shortcuts.categories.games")}</TabsTrigger>
+                            <TabsTrigger value="others">{t("shortcuts.categories.others")}</TabsTrigger>
                         </TabsList>
                     </Tabs>
                     
                     {/* Tags */}
-                    <div className="flex gap-2 ">
+                    <div className="flex gap-2">
                         {tags.map((tag) => (
                             <TagBadge
                                 key={tag.id}
@@ -207,7 +218,7 @@ export default function Dashboard() {
             
             {/* Shortcut Grid */}
             <div className="flex-1 overflow-y-auto">
-                <div className="flex flex-col gap-6 p-8">
+                <div className="flex flex-col gap-6 px-8 pb-8">
                     {groupByCategory(visibleShortcuts).map(([category, items]) => (
                         <ShortcutGrid
                             key={category}
@@ -223,13 +234,11 @@ export default function Dashboard() {
             </div>
             
             {/* Footer */}
-            <div className="flex justify-between items-center gap-4 h-8 bg-background/30 p-8">
+            <div className="flex justify-between items-center gap-4 bg-background/30 px-8 py-4">
                 <img src="icon.png" alt="Logo" className="h-7 w-7" />
-                <div className="space-x-2">
-                    <Button variant="outline" size="icon">
-                        <a href="https://buymeacoffee.com/diego_cordova" target="_blank">
-                            <Coffee />
-                        </a>
+                <div className="space-x-4">
+                    <Button onClick={handleScanGames} variant="outline" size="icon">
+                        <RotateCcw />
                     </Button>
                     <Button onClick={() => navigate("/settings")} variant="outline" size="icon">
                         <Settings />

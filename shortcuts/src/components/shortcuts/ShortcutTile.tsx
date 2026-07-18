@@ -6,6 +6,7 @@ import { Shortcut } from "@/types";
 import { Tag } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { useTranslation } from "react-i18next";
 import {
     ContextMenu,
     ContextMenuLabel,
@@ -47,6 +48,8 @@ export default function ShortcutTile({
     onRemove,
     onUpdate
 }: Props) {
+    const { t } = useTranslation();
+
     // Get icon source path
     // If icon_path is null, use a default icon
     const iconSrc = shortcut.icon_path ? convertFileSrc(shortcut.icon_path) : null;
@@ -121,11 +124,11 @@ export default function ShortcutTile({
                 <ContextMenuGroup>
                     <ContextMenuItem onClick={() => onLaunch(shortcut)}>
                         <ExternalLink />
-                        Abrir
+                        {t("shortcuts.open")}
                     </ContextMenuItem>
                     <ContextMenuItem onClick={() => onUpdate({ ...shortcut, is_favorite: !shortcut.is_favorite })}>
                         {shortcut.is_favorite ? <Star className="fill-yellow-400 text-yellow-400" /> : <Star />}
-                        Favorito
+                        {t("shortcuts.favorite")}
                     </ContextMenuItem>
                 </ContextMenuGroup>
                 
@@ -133,7 +136,7 @@ export default function ShortcutTile({
                 <ContextMenuSub>
                     <ContextMenuSubTrigger>
                         <TagIcon />
-                        Etiquetas
+                        {t("shortcuts.tags")}
                     </ContextMenuSubTrigger>
                     <ContextMenuSubContent>
                         {tags.length > 0 ? (
@@ -160,7 +163,7 @@ export default function ShortcutTile({
                             ))
                         ) : (
                             <ContextMenuItem disabled>
-                                No hay etiquetas
+                                {t("shortcuts.noTags")}
                             </ContextMenuItem>
                         )}
                     </ContextMenuSubContent>
@@ -170,16 +173,16 @@ export default function ShortcutTile({
                 <ContextMenuSub>
                     <ContextMenuSubTrigger>
                         <Folder />
-                        Mover
+                        {t("shortcuts.category")}
                     </ContextMenuSubTrigger>
                     <ContextMenuSubContent>
                         <ContextMenuRadioGroup
                             value={shortcut.category}
                             onValueChange={(category) => onUpdate({ ...shortcut, category: category as Shortcut["category"] })}
                         >
-                            <ContextMenuRadioItem value="launchers">Launchers</ContextMenuRadioItem>
-                            <ContextMenuRadioItem value="games">Juegos</ContextMenuRadioItem>
-                            <ContextMenuRadioItem value="others">Otros</ContextMenuRadioItem>
+                            <ContextMenuRadioItem value="launchers">{t("shortcuts.categories.launchers")}</ContextMenuRadioItem>
+                            <ContextMenuRadioItem value="games">{t("shortcuts.categories.games")}</ContextMenuRadioItem>
+                            <ContextMenuRadioItem value="others">{t("shortcuts.categories.others")}</ContextMenuRadioItem>
                         </ContextMenuRadioGroup>
                     </ContextMenuSubContent>
                 </ContextMenuSub>
@@ -189,7 +192,7 @@ export default function ShortcutTile({
                 <ContextMenuGroup>
                     <ContextMenuItem variant="destructive" onClick={() => onRemove(shortcut.id)}>
                         <Trash />
-                        Eliminar
+                        {t("shortcuts.delete")}
                     </ContextMenuItem>
                 </ContextMenuGroup>
             </ContextMenuContent>

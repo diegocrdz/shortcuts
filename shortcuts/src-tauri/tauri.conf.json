@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "shortcuts",
+  "productName": "Shortcuts",
   "version": "0.1.0",
-  "identifier": "com.dcord.shortcuts",
+  "identifier": "app.shortcuts.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,6 +13,7 @@
     "windows": [
       {
         "label": "main",
+        "title": "Shortcuts",
         "width": 830,
         "height": 500,
         "decorations": false,
@@ -26,10 +27,6 @@
         "enable": true,
         "scope": ["$APPDATA/icons/*"]
       }
-    },
-    "trayIcon": {
-      "iconPath": "icons/icon.png",
-      "tooltip": "Shortcuts"
     }
   },
   "bundle": {

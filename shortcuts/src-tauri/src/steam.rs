@@ -2,10 +2,11 @@
  * Scan and detect steam games on the system
  */
 
-use crate::shortcuts::{game_shortcut, launcher_shortcut, Shortcut, SOURCE_STEAM};
+use crate::shortcuts::{game_shortcut, launcher_shortcut, extract_icon_from_exe, icons_dir, Shortcut, SOURCE_STEAM};
 use std::fs;
 use std::path::PathBuf;
 use std::path::Path;
+use tauri::AppHandle;
 
 /// Extract the value of a key from a VDF (Valve Data Format) string
 fn vdf_value(content: &str, key: &str) -> Option<String> {
@@ -37,25 +38,43 @@ fn steam_library_folders(steam_path: &Path) -> Vec<PathBuf> {
     libs
 }
 
+// Find the smallest icon file in the Steam appcache for a given appid
+fn find_steam_icon(steam_path: &Path, appid: &str) -> Option<PathBuf> {
+    let dir = steam_path.join("appcache").join("librarycache").join(appid);
+    let entries = fs::read_dir(&dir).ok()?;
+
+    entries
+        .flatten()
+        .filter(|entry| entry.path().is_file()) // Only consider files
+        .min_by_key(|entry| entry.metadata().map(|m| m.len()).unwrap_or(u64::MAX))
+        .map(|entry| entry.path())
+}
+
+// Save the Steam game icon to the app's icons directory
+fn save_steam_game_icon(app: &AppHandle, steam_path: &Path, appid: &str) -> Option<String> {
+    let cached = find_steam_icon(steam_path, appid)?;
+    let ext = cached.extension().and_then(|e| e.to_str()).unwrap_or("jpg");
+
+    let dest = icons_dir(app)?.join(format!("steam-{}.{}", appid, ext));
+    fs::copy(&cached, &dest).ok()?;
+    dest.to_str().map(|s| s.to_string())
+}
+
 // Scan for installed Steam games and return them as a list of shortcuts
-pub fn scan_steam() -> Vec<Shortcut> {
+pub fn scan_steam(app: &AppHandle) -> Vec<Shortcut> {
     let mut results = Vec::new();
     let Some(steam_path) = steam_install_path() else { return results; };
 
-    // Steam launcher
+    // Launcher
 
     let launcher = steam_path.join("Steam.exe");
-
     if launcher.exists() {
-        results.push(launcher_shortcut(
-            "steam",
-            "Steam",
-            launcher.to_string_lossy().to_string(),
-            SOURCE_STEAM,
-        ));
+        let mut shortcut = launcher_shortcut("steam", "Steam", launcher.to_string_lossy().to_string(), SOURCE_STEAM);
+        shortcut.icon_path = extract_icon_from_exe(app, &shortcut.target, &shortcut.id);
+        results.push(shortcut);
     }
 
-    // Steam games
+    // Games
 
     for lib in steam_library_folders(&steam_path) {
         let steamapps = lib.join("steamapps");
@@ -68,13 +87,15 @@ pub fn scan_steam() -> Vec<Shortcut> {
             let Ok(content) = fs::read_to_string(&path) else { continue; };
             let (Some(name), Some(appid)) = (vdf_value(&content, "name"), vdf_value(&content, "appid")) else { continue; };
 
-            // Create shortcuts
-            results.push(game_shortcut(
+            let mut shortcut = game_shortcut(
                 format!("steam-{}", appid),
                 name,
                 format!("steam://rungameid/{}", appid),
                 SOURCE_STEAM,
-            ));
+            );
+            shortcut.icon_path = save_steam_game_icon(app, &steam_path, &appid);
+
+            results.push(shortcut);
         }
     }
     results

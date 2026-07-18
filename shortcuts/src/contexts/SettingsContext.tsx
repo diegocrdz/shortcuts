@@ -7,6 +7,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Theme } from "@/types";
+import i18n from "@/i18n";
 
 interface Settings {
     theme: Theme;
@@ -36,6 +37,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         invoke<Settings>("get_settings").then((loaded) => {
             setSettings(loaded);
             applyTheme(loaded.theme);
+            i18n.changeLanguage(loaded.language);
         });
     }, []);
 
@@ -52,6 +54,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         const next = { ...settings, ...partial };
         setSettings(next);
         applyTheme(next.theme);
+        if (partial.language) i18n.changeLanguage(partial.language);
         await invoke("update_settings", { settings: next });
     }
 

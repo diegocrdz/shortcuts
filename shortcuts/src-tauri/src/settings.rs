@@ -5,6 +5,7 @@
 use tauri::AppHandle;
 use crate::shortcuts::{Shortcut, save};
 use crate::tags::{Tag, save_tags};
+use crate::excluded::clear_excluded;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
@@ -85,6 +86,9 @@ pub fn reset_settings(app: AppHandle) -> Result<Settings, String> {
     // Delete all shortcuts and tags
     delete_shortcuts(app.clone())?;
     delete_tags(app.clone())?;
+
+    // Clear the excluded list
+    clear_excluded(app.clone())?;
 
     // Reset settings to default
     save_settings(&app, &Settings::default())?;

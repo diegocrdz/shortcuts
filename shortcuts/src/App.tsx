@@ -4,6 +4,8 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import { Toaster } from "@/components/ui/sonner"
+
 import Dashboard from "@/pages/Dashboard";
 import Settings from "@/pages/Settings";
 
@@ -17,6 +19,7 @@ function App() {
                         <Route path="/settings" element={<Settings />} />
                     </Routes>
                 </main>
+                <Toaster position="bottom-right" />
             </SettingsProvider>
         </BrowserRouter>
     );

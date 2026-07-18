@@ -3,6 +3,7 @@ import { Tag } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { CirclePlus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import TagMenu from "@/components/tags/TagMenu";
 
 const DEFAULT_COLOR = "#f59e0b";
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function AddTag({ onCreate }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState(DEFAULT_COLOR);
@@ -30,7 +32,7 @@ export default function AddTag({ onCreate }: Props) {
         <PopoverTrigger>
             <Badge variant="outline" className="cursor-pointer border-dashed border h-full">
                 <CirclePlus />
-                Agregar
+                {t("tags.create")}
             </Badge>
         </PopoverTrigger>
         <PopoverContent className="w-fit">

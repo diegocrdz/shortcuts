@@ -1,0 +1,63 @@
+{
+    "shortcuts": {
+        "open": "Open",
+        "favorite": "Favorite",
+        "tags": "Tags",
+        "noTags": "No tags",
+        "category": "Move",
+        "delete": "Delete",
+        "categories": {
+            "all": "All",
+            "favourites": "Favorites",
+            "launchers": "Launchers",
+            "games": "Games",
+            "others": "Others"
+        },
+        "actions": {
+            "launching": "Opening",
+            "launched": "Opened",
+            "launchError": "Error opening"
+        }
+    },
+    "tags": {
+        "create": "Add",
+        "delete": "Delete",
+        "name": "Name",
+        "namePlaceholder": "Tag name",
+        "color": "Color"
+    },
+    "searchBar": {
+        "placeholder": "Search shortcuts..."
+    },
+    "settings": {
+        "title": "Settings",
+        "description": "General application settings.",
+        "tabs": {
+            "general": "General"
+        },
+        "donate": "If you like the app, consider donating a coffee.",
+        "theme": "Theme",
+        "themeOptions": {
+            "light": "Light",
+            "dark": "Dark",
+            "system": "System"
+        },
+        "language": "Language",
+        "languageOptions": {
+            "en": "English",
+            "es": "Spanish"
+        },
+        "updateInterval": "Update interval",
+        "updateIntervalOptions": {
+            "1": "1 hour",
+            "6": "6 hours",
+            "12": "12 hours",
+            "24": "24 hours"
+        },
+        "deleteData": "Delete data",
+        "deleteDataConfirmTitle": "Delete data?",
+        "deleteDataConfirmDescription": "This will delete all application data and reset settings to their default values. This cannot be undone.",
+        "cancel": "Cancel",
+        "dataDeleted": "Data deleted"
+    }
+}
