@@ -31,9 +31,44 @@
     },
     "settings": {
         "title": "Settings",
-        "description": "General application settings.",
         "tabs": {
-            "general": "General"
+            "general": {
+                "title": "General",
+                "description": "General application settings."
+            },
+            "shortcuts": {
+                "title": "Shortcuts",
+                "description": "Manage shortcuts."
+            },
+            "tags": {
+                "title": "Tags",
+                "description": "Manage tags."
+            },
+            "categories": {
+                "title": "Categories",
+                "description": "Manage categories."
+            },
+            "about": {
+                "title": "About",
+                "description": "Information about the application.",
+                "version": {
+                    "title": "Version",
+                    "description": "1.0.0"
+                },
+                "lastUpdate": {
+                    "title": "Last update",
+                    "description": "2024-06-01"
+                },
+                "license": {
+                    "title": "License",
+                    "description": "MIT"
+                },
+                "github": {
+                    "title": "GitHub",
+                    "description": "View the source code on GitHub.",
+                    "button": "View on GitHub"
+                }
+            }
         },
         "donate": "If you like the app, consider donating a coffee.",
         "theme": "Theme",

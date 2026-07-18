@@ -76,6 +76,11 @@ fn find_and_extract_icon(app: &AppHandle, exe_dir: &Path, id: &str) -> Option<St
             Some(icon_path) => {
                 return Some(icon_path);
             }
+
+            // If extraction fails, continue to the next candidate
+            None => {
+                continue;
+            }
         }
     }
     None

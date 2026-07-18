@@ -31,9 +31,44 @@
     },
     "settings": {
         "title": "Configuración",
-        "description": "Configuración general de la aplicación.",
         "tabs": {
-            "general": "General"
+            "general": {
+                "title": "General",
+                "description": "Configuración general de la aplicación."
+            },
+            "shortcuts": {
+                "title": "Atajos",
+                "description": "Administrar atajos."
+            },
+            "tags": {
+                "title": "Etiquetas",
+                "description": "Administrar etiquetas."
+            },
+            "categories": {
+                "title": "Categorías",
+                "description": "Administrar categorías."
+            },
+            "about": {
+                "title": "Acerca de",
+                "description": "Información sobre la aplicación.",
+                "version": {
+                    "title": "Versión",
+                    "description": "1.0.0"
+                },
+                "lastUpdate": {
+                    "title": "Última actualización",
+                    "description": "2024-06-01"
+                },
+                "license": {
+                    "title": "Licencia",
+                    "description": "MIT"
+                },
+                "github": {
+                    "title": "GitHub",
+                    "description": "Repositorio de la aplicación en GitHub.",
+                    "button": "Abrir en GitHub"
+                }
+            }
         },
         "donate": "Si te gusta la aplicación, considera donar un café.",
         "theme": "Tema",

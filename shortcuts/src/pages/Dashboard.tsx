@@ -23,6 +23,7 @@ import TagBadge from "@/components/tags/TagBadge";
 import AddTag from "@/components/tags/AddTag";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner"
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Icons
@@ -44,6 +45,7 @@ export default function Dashboard() {
     const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
     const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const [launching, setLaunching] = useState<{ name: string; progress: number } | null>(null);
     const navigate = useNavigate();
 
     const CATEGORY_LABELS: Record<Shortcut["category"], string> = {
@@ -95,18 +97,39 @@ export default function Dashboard() {
     
     // Shortcut functions
     function launchShortcut(shortcut: Shortcut) {
-        // Artificial delay for the toast
-        const minDelay = new Promise((resolve) => setTimeout(resolve, 1000));
+        setLaunching({ name: shortcut.name, progress: 0 });
 
-        // Launch the shortcut and show a toast notification
+        const startTime = Date.now();
+        const estimatedDuration = 3000; // ms — se acerca a 90% en este ritmo, sin llegar
+
+        const interval = setInterval(() => {
+            setLaunching((prev) => {
+                if (!prev) return prev;
+                const elapsed = Date.now() - startTime;
+                const target = 90 * (1 - Math.exp(-elapsed / estimatedDuration));
+                return { ...prev, progress: target };
+            });
+        }, 100);
+
+        const minDelay = new Promise((resolve) => setTimeout(resolve, 1000));
         const launch = Promise.all([invoke("launch_shortcut", { shortcut }), minDelay])
             .then(([result]) => result);
 
         toast.promise(launch, {
-            loading: `${t("shortcuts.actions.launching")} ${shortcut.name}...`,
             success: `${t("shortcuts.actions.launched")} ${shortcut.name}.`,
             error: `${t("shortcuts.actions.launch_failed")} ${shortcut.name}.`,
         });
+
+        launch
+            .then(() => {
+                clearInterval(interval);
+                setLaunching({ name: shortcut.name, progress: 100 });
+                setTimeout(() => setLaunching(null), 400);
+            })
+            .catch(() => {
+                clearInterval(interval);
+                setLaunching(null);
+            });
     }
     async function createShortcut() {
         const selected = await open({
@@ -180,7 +203,7 @@ export default function Dashboard() {
         <div className="flex flex-col h-full">
             {/* Header */}
             <div className="flex flex-col gap-8 p-8">
-                <div className="flex justify-between items-center gap-2">
+                <div className="flex justify-between items-center gap-4">
                     <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
                     <Button onClick={createShortcut} variant="outline" size="icon">
                         <Plus />
@@ -232,6 +255,13 @@ export default function Dashboard() {
                     ))}
                 </div>
             </div>
+
+            {/* Launch progress */}
+            {launching && (
+                <Progress
+                    value={launching.progress}
+                />
+            )}
             
             {/* Footer */}
             <div className="flex justify-between items-center gap-4 bg-background/30 px-8 py-4">

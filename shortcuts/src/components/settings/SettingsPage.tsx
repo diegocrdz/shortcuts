@@ -14,7 +14,7 @@ export default function GeneralSettings({
     children,
 }: GeneralSettingsProps) {
     return (
-        <div className="flex flex-col gap-8 p-8 overflow-auto">
+        <div className="flex flex-col w-full gap-8 p-8 overflow-auto">
             {/* Header */}
             <div className="flex flex-col jusitfy-center">
                 <h2 className="text-md font-semibold">{name}</h2>
