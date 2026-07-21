@@ -1,4 +1,8 @@
 {
+    "table": {
+        "search": "Search...",
+        "noData": "No data"
+    },
     "shortcuts": {
         "open": "Open",
         "favorite": "Favorite",
@@ -14,9 +18,21 @@
             "others": "Others"
         },
         "actions": {
-            "launching": "Opening",
+            "launching": "Opening...",
             "launched": "Opened",
-            "launchError": "Error opening"
+            "launchError": "Error opening",
+            "selected": "selected",
+            "restore": "Restore",
+            "scanning": "Scanning...",
+            "scanComplete": "Scan complete",
+            "shortcutCreated": "Shortcut created",
+            "shortcutUpdated": "Shortcut updated",
+            "shortcutDeleted": "Shortcut deleted"
+        },
+        "columns": {
+            "name": "Name",
+            "source": "Source",
+            "actions": "Actions"
         }
     },
     "tags": {
@@ -24,7 +40,12 @@
         "delete": "Delete",
         "name": "Name",
         "namePlaceholder": "Tag name",
-        "color": "Color"
+        "color": "Color",
+        "actions": {
+            "tagCreated": "Tag created",
+            "tagUpdated": "Tag updated",
+            "tagDeleted": "Tag deleted"
+        }
     },
     "searchBar": {
         "placeholder": "Search shortcuts..."
@@ -36,32 +57,33 @@
                 "title": "General",
                 "description": "General application settings."
             },
-            "shortcuts": {
-                "title": "Shortcuts",
-                "description": "Manage shortcuts."
-            },
-            "tags": {
-                "title": "Tags",
-                "description": "Manage tags."
-            },
-            "categories": {
-                "title": "Categories",
-                "description": "Manage categories."
+            "excluded": {
+                "title": "Excluded",
+                "description": "These are the shortcuts that have been deleted and will be ignored when syncing with external launchers."
             },
             "about": {
                 "title": "About",
                 "description": "Information about the application.",
                 "version": {
                     "title": "Version",
-                    "description": "1.0.0"
+                    "description": "0.1.0"
                 },
                 "lastUpdate": {
                     "title": "Last update",
-                    "description": "2024-06-01"
+                    "description": "2026-07-22"
                 },
                 "license": {
                     "title": "License",
                     "description": "MIT"
+                },
+                "launchers": {
+                    "title": "Supported launchers",
+                    "description": "These are the launchers that the application currently supports.",
+                    "list": {
+                        "steam": "Steam",
+                        "epicGames": "Epic Games",
+                        "riotClient": "Riot Client"
+                    }
                 },
                 "github": {
                     "title": "GitHub",
@@ -70,7 +92,14 @@
                 }
             }
         },
-        "donate": "If you like the app, consider donating a coffee.",
+        "donate": "This project was developed by a single person. If you like it, consider donating a coffee.",
+        "github": "View the project on GitHub.",
+        "position": "Position",
+        "positionOptions": {
+            "bottomCenter": "Bottom - Center",
+            "bottomLeft": "Bottom - Left",
+            "center": "Center"
+        },
         "theme": "Theme",
         "themeOptions": {
             "light": "Light",
@@ -89,7 +118,7 @@
             "12": "12 hours",
             "24": "24 hours"
         },
-        "deleteData": "Delete data",
+        "deleteData": "Delete all data",
         "deleteDataConfirmTitle": "Delete data?",
         "deleteDataConfirmDescription": "This will delete all application data and reset settings to their default values. This cannot be undone.",
         "cancel": "Cancel",

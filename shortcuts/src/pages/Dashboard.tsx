@@ -3,14 +3,12 @@
  */
 
 // React
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 // Tauri
-import { getCurrentWindow, currentMonitor, LogicalPosition } from "@tauri-apps/api/window";
-import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 // Types
 import { Shortcut } from "@/types";
@@ -22,13 +20,18 @@ import SearchBar from "@/components/SearchBar";
 import TagBadge from "@/components/tags/TagBadge";
 import AddTag from "@/components/tags/AddTag";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner"
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+// API
+import { getTags, createTag, updateTag, deleteTag } from "@/lib/api/tags";
+import { getShortcuts, createShortcut, updateShortcut, deleteShortcut, launchShortcut } from "@/lib/api/shortcuts";
+import { scanGames } from "@/lib/api/scanner";
 
 // Icons
 import { RotateCcw, Plus, Settings } from "lucide-react";
 
+// Group shortcuts by category
 function groupByCategory(list: Shortcut[]): [Shortcut["category"], Shortcut[]][] {
     const groups: Record<string, Shortcut[]> = { launchers: [], games: [], others: [] };
     for (const s of list) {
@@ -45,7 +48,9 @@ export default function Dashboard() {
     const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
     const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
-    const [launching, setLaunching] = useState<{ name: string; progress: number } | null>(null);
+    const [loading, setLoading] = useState<{ name: string; progress: number } | null>(null);
+    const [footerMsg, setFooterMsg] = useState<string | null>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
 
     const CATEGORY_LABELS: Record<Shortcut["category"], string> = {
@@ -60,113 +65,51 @@ export default function Dashboard() {
         // Filter by selected tags
         .filter((s) => selectedTagIds.size === 0 || s.tags.some((tagId) => selectedTagIds.has(tagId)))
         // Filter by search query
-        .filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        .filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
     
-    // Load tags and shortcuts from the backend when the component mounts
+    // Focus search bar when the window is focused
     useEffect(() => {
-        invoke<Shortcut[]>("get_shortcuts").then(setShortcuts);
-        invoke<Tag[]>("get_tags").then(setTags);
-    }, []);
-    
-    // Position the window at the bottom center of the screen
-    useEffect(() => {
-        async function positionWindow() {
-            const win = getCurrentWindow();
-            const monitor = await currentMonitor();
-            if (!monitor) return;
-            
-            const scale = monitor.scaleFactor;
-            const screenW = monitor.size.width / scale;
-            const screenH = monitor.size.height / scale;
-            
-            const winSize = await win.outerSize();
-            const winW = winSize.width / scale;
-            const winH = winSize.height / scale;
-            
-            const taskbarHeight = 48;
-            const margin = 12;
-            
-            const x = (screenW - winW) / 2;
-            const y = screenH - winH - margin - taskbarHeight;
-            
-            await win.setPosition(new LogicalPosition(x, y));
-            await win.show();
-        }
-        positionWindow();
-    }, []);
-    
-    // Shortcut functions
-    function launchShortcut(shortcut: Shortcut) {
-        setLaunching({ name: shortcut.name, progress: 0 });
-
-        const startTime = Date.now();
-        const estimatedDuration = 3000; // ms — se acerca a 90% en este ritmo, sin llegar
-
-        const interval = setInterval(() => {
-            setLaunching((prev) => {
-                if (!prev) return prev;
-                const elapsed = Date.now() - startTime;
-                const target = 90 * (1 - Math.exp(-elapsed / estimatedDuration));
-                return { ...prev, progress: target };
-            });
-        }, 100);
-
-        const minDelay = new Promise((resolve) => setTimeout(resolve, 1000));
-        const launch = Promise.all([invoke("launch_shortcut", { shortcut }), minDelay])
-            .then(([result]) => result);
-
-        toast.promise(launch, {
-            success: `${t("shortcuts.actions.launched")} ${shortcut.name}.`,
-            error: `${t("shortcuts.actions.launch_failed")} ${shortcut.name}.`,
+        const win = getCurrentWindow();
+        const unlisten = win.listen("tauri://focus", () => {
+            setSearchQuery("");
+            searchInputRef.current?.focus();
         });
-
-        launch
-            .then(() => {
-                clearInterval(interval);
-                setLaunching({ name: shortcut.name, progress: 100 });
-                setTimeout(() => setLaunching(null), 400);
-            })
-            .catch(() => {
-                clearInterval(interval);
-                setLaunching(null);
-            });
-    }
-    async function createShortcut() {
-        const selected = await open({
-            multiple: false,
-            filters: [{ name: "Ejecutable", extensions: ["exe"] }],
-        });
-        if (typeof selected !== "string") return;
-        
-        const fallbackName = selected.split("\\").pop()?.replace(/\.exe$/i, "") ?? selected;
-        const friendlyName = await invoke<string | null>("get_exe_friendly_name", { exePath: selected });
-        const name = friendlyName ?? fallbackName;
-        
-        const newShortcut: Shortcut = {
-            id: crypto.randomUUID(),
-            name,
-            target: selected,
-            args: null,
-            source: "manual",
-            is_favorite: false,
-            tags: [],
-            icon_path: null,
-            category: "others"
+        return () => {
+            unlisten.then((fn) => fn());
         };
-        
-        const updated = await invoke<Shortcut[]>("create_shortcut", { shortcut: newShortcut });
-        setShortcuts(updated);
+    }, []);
+
+    // Fetch data from the backend
+    function fetchData() {
+        getShortcuts().then(setShortcuts);
+        getTags().then(setTags);
     }
-    async function updateShortcut(shortcut: Shortcut) {
-        const updated = await invoke<Shortcut[]>("update_shortcut", { shortcut });
-        setShortcuts(updated);
-    }
-    async function deleteShortcut(id: string) {
-        const updated = await invoke<Shortcut[]>("delete_shortcut", { id });
-        setShortcuts(updated);
-    }
+    
+    // Load initial data on mount
+    useEffect(() => {
+        fetchData();
+    }, []);
     
     // Tag functions
+
+    async function handleCreateTag(tag: Tag) {
+        const updatedTags = await createTag(tag);
+        setTags(updatedTags);
+        showFooterMessage(t("tags.actions.tagCreated"));
+    }
+
+    async function handleUpdateTag(tag: Tag) {
+        const updatedTags = await updateTag(tag);
+        setTags(updatedTags);
+        showFooterMessage(t("tags.actions.tagUpdated"));
+    }
+
+    async function handleDeleteTag(id: string) {
+        const updatedTags = await deleteTag(id);
+        setTags(updatedTags);
+        showFooterMessage(t("tags.actions.tagDeleted"));
+    }
+
     function toggleTag(id: string) {
         setSelectedTagIds((prev) => {
             const next = new Set(prev);
@@ -175,28 +118,79 @@ export default function Dashboard() {
             return next;
         });
     }
-    async function createTag(tag: Tag) {
-        setTags(await invoke<Tag[]>("create_tag", { tag }));
-    }
-    async function updateTag(tag: Tag) {
-        setTags(await invoke<Tag[]>("update_tag", { tag }));
-    }
-    async function deleteTag(id: string) {
-        setTags(await invoke<Tag[]>("delete_tag", { id }));
+
+    // Shortcut functions
+
+    async function handleCreateShortcut() {
+        const updatedShortcuts = await createShortcut();
+        if (updatedShortcuts) setShortcuts(updatedShortcuts);
+        showFooterMessage(t("shortcuts.actions.shortcutCreated"));
     }
 
-    // Scan games
+    async function handleUpdateShortcut(shortcut: Shortcut) {
+        const updatedShortcuts = await updateShortcut(shortcut);
+        if (updatedShortcuts) setShortcuts(updatedShortcuts);
+        showFooterMessage(t("shortcuts.actions.shortcutUpdated"));
+    }
+
+    async function handleDeleteShortcut(id: string) {
+        const updatedShortcuts = await deleteShortcut(id);
+        if (updatedShortcuts) setShortcuts(updatedShortcuts);
+        showFooterMessage(t("shortcuts.actions.shortcutDeleted"));
+    }
+
+    // Scanner functions
+
     async function handleScanGames() {
-        const found = await invoke<Shortcut[]>("scan_installed_games");
-        const existingIds = new Set(shortcuts.map((s) => s.id));
-        const newOnes = found.filter((s) => !existingIds.has(s.id));
+        const updatedShortcuts = await withProgress(
+            t("shortcuts.actions.scanning"),
+            scanGames(shortcuts)
+        );
+        setShortcuts(updatedShortcuts);
+        showFooterMessage(t("shortcuts.actions.scanComplete"));
+    }
 
-        for (const game of newOnes) {
-            await invoke<Shortcut[]>("create_shortcut", { shortcut: game });
+    // Launch shortcut function
+    async function handleLaunchShortcut(shortcut: Shortcut) {
+        await withProgress(
+            t("shortcuts.actions.launching"),
+            launchShortcut(shortcut)
+        );
+        showFooterMessage(t("shortcuts.actions.launching"));
+    }
+
+    // Utility function to show a progress bar during async operations
+    async function withProgress<T>(name: string, task: Promise<T>): Promise<T> {
+        setLoading({ name, progress: 0 });
+        setFooterMsg(name);
+
+        const start = Date.now();
+        const estimatedDuration = 3000; // Estimated duration for the progress bar to reach 90%
+        const interval = setInterval(() => {
+            // Update progress based on elapsed time and estimated duration
+            setLoading((prev) => {
+                if (!prev) return prev;
+                const elapsed = Date.now() - start;
+                const target = 90 * (1 - Math.exp(-elapsed / estimatedDuration));
+                return { ...prev, progress: target };
+            });
+        }, 100);
+
+        try {
+            const result = await task;
+            clearInterval(interval);
+            setLoading({ name, progress: 100 });
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            return result;
+        } finally {
+            setLoading(null);
         }
+    }
 
-        const refreshed = await invoke<Shortcut[]>("get_shortcuts");
-        setShortcuts(refreshed);
+    // Display footer message for a few seconds
+    function showFooterMessage(msg: string, duration: number = 3000) {
+        setFooterMsg(msg);
+        setTimeout(() => setFooterMsg(null), duration);
     }
     
     return (
@@ -204,8 +198,8 @@ export default function Dashboard() {
             {/* Header */}
             <div className="flex flex-col gap-8 p-8">
                 <div className="flex justify-between items-center gap-4">
-                    <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
-                    <Button onClick={createShortcut} variant="outline" size="icon">
+                    <SearchBar ref={searchInputRef} query={searchQuery} onQueryChange={setSearchQuery} />
+                    <Button onClick={handleCreateShortcut} variant="outline" size="icon">
                         <Plus />
                     </Button>
                 </div>
@@ -230,11 +224,11 @@ export default function Dashboard() {
                                 tag={tag}
                                 selected={selectedTagIds.has(tag.id)}
                                 onClick={() => toggleTag(tag.id)}
-                                onUpdate={updateTag}
-                                onDelete={deleteTag}
+                                onUpdate={handleUpdateTag}
+                                onDelete={handleDeleteTag}
                             />
                         ))}
-                        <AddTag onCreate={createTag} />
+                        <AddTag onCreate={handleCreateTag} />
                     </div>
                 </div>
             </div>
@@ -248,29 +242,40 @@ export default function Dashboard() {
                             title={CATEGORY_LABELS[category]}
                             shortcuts={items}
                             tags={tags}
-                            onLaunch={launchShortcut}
-                            onRemove={deleteShortcut}
-                            onUpdate={updateShortcut}
+                            onLaunch={handleLaunchShortcut}
+                            onUpdate={handleUpdateShortcut}
+                            onRemove={handleDeleteShortcut}
                         />
                     ))}
                 </div>
             </div>
 
-            {/* Launch progress */}
-            {launching && (
+            {/* Loading progress bar */}
+            {loading && (
                 <Progress
-                    value={launching.progress}
+                    value={loading.progress}
                 />
             )}
             
             {/* Footer */}
             <div className="flex justify-between items-center gap-4 bg-background/30 px-8 py-4">
                 <img src="icon.png" alt="Logo" className="h-7 w-7" />
+                <div className="text-sm text-muted-foreground">
+                    {footerMsg}
+                </div>
                 <div className="space-x-4">
-                    <Button onClick={handleScanGames} variant="outline" size="icon">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleScanGames}
+                    >
                         <RotateCcw />
                     </Button>
-                    <Button onClick={() => navigate("/settings")} variant="outline" size="icon">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => navigate("/settings")}
+                    >
                         <Settings />
                     </Button>
                 </div>

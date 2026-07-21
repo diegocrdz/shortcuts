@@ -5,6 +5,7 @@
  */
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { getCurrentWindow, currentMonitor, LogicalPosition } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { Theme } from "@/types";
 import i18n from "@/i18n";
@@ -13,6 +14,7 @@ interface Settings {
     theme: Theme;
     language: string;
     update_interval: number;
+    position: string;
 }
 
 interface SettingsContextValue {
@@ -32,6 +34,49 @@ function applyTheme(theme: Theme) {
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
     const [settings, setSettings] = useState<Settings | null>(null);
+
+    // Position the window at the bottom center of the screen
+    useEffect(() => {
+        async function positionWindow() {
+            const win = getCurrentWindow();
+            const monitor = await currentMonitor();
+            if (!monitor) return;
+            
+            const scale = monitor.scaleFactor;
+            const screenW = monitor.size.width / scale;
+            const screenH = monitor.size.height / scale;
+            
+            const winSize = await win.outerSize();
+            const winW = winSize.width / scale;
+            const winH = winSize.height / scale;
+            
+            const taskbarHeight = 48;
+            const margin = 12;
+            
+            let x: number;
+            let y: number;
+
+            switch (settings?.position) {
+                case "bottom-left":
+                    x = margin;
+                    y = screenH - winH - margin - taskbarHeight;
+                    break;
+                case "center":
+                    x = (screenW - winW) / 2;
+                    y = (screenH - winH) / 2;
+                    break;
+                case "bottom-center":
+                default:
+                    x = (screenW - winW) / 2;
+                    y = screenH - winH - margin - taskbarHeight;
+                    break;
+            }
+            
+            await win.setPosition(new LogicalPosition(x, y));
+            await win.show();
+        }
+        positionWindow();
+    }, [settings?.position]);
 
     useEffect(() => {
         invoke<Settings>("get_settings").then((loaded) => {

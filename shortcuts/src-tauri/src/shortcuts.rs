@@ -122,7 +122,7 @@ pub fn get_shortcuts(app: AppHandle) -> Vec<Shortcut> {
 pub fn create_shortcut(app: AppHandle, mut shortcut: Shortcut) -> Result<Vec<Shortcut>, String> {
     let mut list = load(&app);
 
-    // Si ya existe un shortcut con este id, no lo dupliques
+    // If the shortcut already exists, do not add it again
     if list.iter().any(|s| s.id == shortcut.id) {
         return Ok(list);
     }
@@ -144,10 +144,11 @@ pub fn delete_shortcut(app: AppHandle, id: String) -> Result<Vec<Shortcut>, Stri
     // If the shortcut is not manual, add it to the excluded list
     if let Some(shortcut) = list.iter().find(|s| s.id == id) {
         if shortcut.source != SOURCE_MANUAL {
-            excluded::add(&app, &id)?;
+            excluded::add(app.clone(), shortcut.clone())?;
         }
     }
 
+    // Remove the shortcut from the list
     list.retain(|s| s.id != id);
     save(&app, &list)?;
     Ok(list)

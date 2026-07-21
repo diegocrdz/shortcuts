@@ -41,7 +41,7 @@ pub fn scan_installed_games(app: AppHandle) -> Vec<Shortcut> {
 
     // Exclude shortcuts that the user has explicitly removed
     let excluded = crate::excluded::load(&app);
-    all.retain(|shortcut| !excluded.contains(&shortcut.id));
+    all.retain(|shortcut| !excluded.iter().any(|e| e.id == shortcut.id));
 
     // Remove duplicates based on the shortcut ID, keeping the first occurrence
     let mut seen = std::collections::HashSet::new();

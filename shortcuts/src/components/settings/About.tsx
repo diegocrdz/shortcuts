@@ -2,8 +2,9 @@
  * About information component
  */
 
-import SettingsPage from "@/components/settings/SettingsPage";
+import SettingsPage from "@/components/settings/SettingsLayout";
 import CoffeeBanner from "@/components/CoffeeBanner";
+import GitHubBanner from "@/components/GitHubBanner";
 import { useTranslation } from "react-i18next";
 
 const DataBox = ({ title, description }: { title: string; description: string }) => {
@@ -11,6 +12,15 @@ const DataBox = ({ title, description }: { title: string; description: string })
         <div className="flex flex-col gap-2 p-4 border rounded-md">
             <h3 className="text-md font-semibold">{title}</h3>
             <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+    );
+}
+
+const LauncherBox = ({ title, imgSrc }: { title: string; imgSrc: string }) => {
+    return (
+        <div className="flex items-center gap-2">
+            <img src={imgSrc} alt={title} className="w-8 h-8" />
+            <h3 className="text-md font-semibold">{title}</h3>
         </div>
     );
 }
@@ -24,8 +34,11 @@ export default function ExcludedShortcuts() {
             description={t("settings.tabs.about.description")}
         >
             <div className="flex flex-col gap-8">
-                {/* Support Banner */}
-                <CoffeeBanner />
+                {/* Support banners */}
+                <div className="grid grid-cols-2 gap-4">
+                    <CoffeeBanner />
+                    <GitHubBanner />
+                </div>
                 
                 {/* General info */}
                 <div className="grid grid-cols-3 gap-4">
@@ -43,18 +56,24 @@ export default function ExcludedShortcuts() {
                     />
                 </div>
 
-                {/* GitHub banner */}
-                <div className="flex flex-col items-center justify-center gap-4 p-8 border rounded-md">
-                    <h3 className="text-md font-semibold">{t("settings.tabs.about.github.title")}</h3>
-                    <p className="text-sm text-muted-foreground">{t("settings.tabs.about.github.description")}</p>
-                    <a
-                        href="https://github.com/diegocrdz/shortcuts"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                    >
-                        {t("settings.tabs.about.github.button")}
-                    </a>
+                {/* Supported launchers */}
+                <div className="flex flex-col gap-4 p-8 border rounded-md">
+                    <h3 className="text-md font-semibold">{t("settings.tabs.about.launchers.title")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("settings.tabs.about.launchers.description")}</p>
+                    <div className="flex flex-col gap-4 mt-4">
+                        <LauncherBox
+                            title={t("settings.tabs.about.launchers.list.steam")}
+                            imgSrc="supported-launchers/steam.svg"
+                        />
+                        <LauncherBox
+                            title={t("settings.tabs.about.launchers.list.epicGames")}
+                            imgSrc="supported-launchers/epic-games.svg"
+                        />
+                        <LauncherBox
+                            title={t("settings.tabs.about.launchers.list.riotClient")}
+                            imgSrc="supported-launchers/riot-client.svg"
+                        />
+                    </div>
                 </div>
             </div>
         </SettingsPage>

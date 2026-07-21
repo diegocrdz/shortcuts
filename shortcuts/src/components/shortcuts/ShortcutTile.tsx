@@ -89,7 +89,7 @@ export default function ShortcutTile({
                 </div>
             </ContextMenuTrigger>
 
-            <ContextMenuContent>
+            <ContextMenuContent className="w-32">
                 <ContextMenuGroup>
                     <ContextMenuLabel>
                         {shortcut.name}

@@ -2,16 +2,23 @@
  * Search bar for shortcuts by name
  */
 
-import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
+import { Kbd } from "@/components/ui/kbd"
 
 type SearchBarProps = {
+    ref?: React.Ref<HTMLInputElement>;
     query: string;
     onQueryChange: (query: string) => void;
 };
 
 export default function SearchBar({
+    ref,
     query,
     onQueryChange,
 }: SearchBarProps) {
@@ -19,15 +26,22 @@ export default function SearchBar({
 
     return (
         <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <Input
-                type="text"
-                autoFocus
-                placeholder={t("searchBar.placeholder")}
-                value={query}
-                onChange={(e) => onQueryChange(e.target.value)}
-                className="pl-10"
-            />
+            <InputGroup>
+                <InputGroupInput
+                    ref={ref}
+                    placeholder={t("searchBar.placeholder")}
+                    value={query}
+                    onChange={(e) => onQueryChange(e.target.value)}
+                />
+                <InputGroupAddon>
+                    <Search />
+                </InputGroupAddon>
+                <InputGroupAddon align="inline-end">
+                    <Kbd>Ctrl</Kbd>
+                    <Kbd>Alt</Kbd>
+                    <Kbd>S</Kbd>
+                </InputGroupAddon>
+            </InputGroup>
         </div>
     );
 }

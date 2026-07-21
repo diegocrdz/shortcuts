@@ -1,21 +1,21 @@
 /**
- * Buy Me A Coffee banner component
+ * GitHub banner component
  */
 
 import { useTranslation } from "react-i18next";
 
-export default function CoffeeBanner() {
+export default function GitHubBanner() {
     const { t } = useTranslation();
     
     return (
-        <a href="https://buymeacoffee.com/diego_cordova" target="_blank" className="flex">
+        <a href="https://github.com/diegocrdz/shortcuts" target="_blank" className="flex">
             <div className="flex gap-4 items-center bg-primary/60 p-4 rounded-md hover:bg-primary/70 transition-colors">
                 <p className="text-xs text-secondary font-semibold">
-                    {t("settings.donate")}
+                    {t("settings.github")}
                 </p>
                 <img
-                    src="buy-me-coffee-icon.png"
-                    alt="Buy Me A Coffee"
+                    src="github-logo.svg"
+                    alt="GitHub Logo"
                     className="h-16 w-16"
                 />
             </div>

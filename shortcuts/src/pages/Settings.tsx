@@ -8,12 +8,10 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
-import { ArrowLeft, Settings2, Rocket, Tag, Info, Folder } from "lucide-react";
+import { ArrowLeft, Settings2, SquareSlash, Info } from "lucide-react";
 
 import General from "@/components/settings/General";
-import Shortcuts from "@/components/settings/Shortcuts";
-import Tags from "@/components/settings/Tags";
-import Categories from "@/components/settings/Categories";
+import Excluded from "@/components/settings/Excluded";
 import About from "@/components/settings/About";
 
 export default function Settings() {
@@ -23,14 +21,12 @@ export default function Settings() {
 
     const TABS = [
         { id: "general", label: t("settings.tabs.general.title"), icon: <Settings2 /> },
-        { id: "shortcuts", label: t("settings.tabs.shortcuts.title"), icon: <Rocket /> },
-        { id: "tags", label: t("settings.tabs.tags.title"), icon: <Tag /> },
-        { id: "categories", label: t("settings.tabs.categories.title"), icon: <Folder /> },
+        { id: "excluded", label: t("settings.tabs.excluded.title"), icon: <SquareSlash /> },
         { id: "about", label: t("settings.tabs.about.title"), icon: <Info /> },
     ];
     
     return (
-        <div className="grid grid-cols-[1fr_8fr] gap-8 h-full overflow-hidden">
+        <div className="grid grid-cols-[auto_1fr] h-full">
             {/* Sidebar */}
             <div className="flex flex-col gap-8 p-8">
                 {/* Title */}
@@ -67,12 +63,8 @@ export default function Settings() {
             <div className="flex bg-background/30 gap-8 overflow-auto">
                 {activeTab === "general" ? (
                     <General />
-                ) : activeTab === "shortcuts" ? (
-                    <Shortcuts />
-                ) : activeTab === "tags" ? (
-                    <Tags />
-                ) : activeTab === "categories" ? (
-                    <Categories />
+                ) : activeTab === "excluded" ? (
+                    <Excluded />
                 ) : activeTab === "about" ? (
                     <About />
                 ) : null}

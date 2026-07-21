@@ -16,6 +16,20 @@ pub struct Settings {
     pub theme: String, // "light" | "dark" | "system"
     pub language: String, // "en" | "es"
     pub update_interval: u32, // hours between automatic sync with game launchers
+    pub position: String, // "bottom-center" | "bottom-left" | "center"
+}
+
+// Detect the system language
+fn detect_system_language() -> String {
+    let supported = ["en", "es"];
+
+    sys_locale::get_locale()
+        .and_then(|locale| {
+            // Only take the first part of the locale (e.g., "en" from "en-US")
+            let lang = locale.split(['-', '_']).next()?.to_lowercase();
+            supported.contains(&lang.as_str()).then_some(lang)
+        })
+        .unwrap_or_else(|| "en".to_string())
 }
 
 // Default settings
@@ -23,8 +37,9 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             theme: "system".into(),
-            language: "en".into(),
+            language: detect_system_language(),
             update_interval: 6,
+            position: "bottom-center".into(),
         }
     }
 }

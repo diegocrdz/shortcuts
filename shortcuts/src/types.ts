@@ -1,3 +1,9 @@
+/**
+ * Types definition to use across the application.
+ */
+
+export type Theme = "light" | "dark" | "system";
+
 export interface Shortcut {
   id: string;
   name: string;
@@ -15,5 +21,3 @@ export interface Tag {
   name: string;
   color: string;
 }
-
-export type Theme = "light" | "dark" | "system";

@@ -1,4 +1,8 @@
 {
+    "table": {
+        "search": "Buscar...",
+        "noData": "No hay datos"
+    },
     "shortcuts": {
         "open": "Abrir",
         "favorite": "Favorito",
@@ -14,9 +18,21 @@
             "others": "Otros"
         },
         "actions": {
-            "launching": "Abriendo",
+            "launching": "Abriendo...",
             "launched": "Abierto",
-            "launchError": "Error al abrir"
+            "launchError": "Error al abrir",
+            "selected": "seleccionado(s)",
+            "restore": "Restaurar",
+            "scanning": "Escaneando...",
+            "scanComplete": "Escaneo completo",
+            "shortcutCreated": "Atajo creado",
+            "shortcutUpdated": "Atajo actualizado",
+            "shortcutDeleted": "Atajo eliminado"
+        },
+        "columns": {
+            "name": "Nombre",
+            "source": "Origen",
+            "actions": "Acciones"
         }
     },
     "tags": {
@@ -24,7 +40,12 @@
         "delete": "Eliminar",
         "name": "Nombre",
         "namePlaceholder": "Nombre de la etiqueta",
-        "color": "Color"
+        "color": "Color",
+        "actions": {
+            "tagCreated": "Etiqueta creada",
+            "tagUpdated": "Etiqueta actualizada",
+            "tagDeleted": "Etiqueta eliminada"
+        }
     },
     "searchBar": {
         "placeholder": "Buscar atajos..."
@@ -36,32 +57,33 @@
                 "title": "General",
                 "description": "Configuración general de la aplicación."
             },
-            "shortcuts": {
-                "title": "Atajos",
-                "description": "Administrar atajos."
-            },
-            "tags": {
-                "title": "Etiquetas",
-                "description": "Administrar etiquetas."
-            },
-            "categories": {
-                "title": "Categorías",
-                "description": "Administrar categorías."
+            "excluded": {
+                "title": "Excluidos",
+                "description": "Estos son los atajos que se han eliminado y serán ignorados al sincronizar con launchers externos."
             },
             "about": {
                 "title": "Acerca de",
                 "description": "Información sobre la aplicación.",
                 "version": {
                     "title": "Versión",
-                    "description": "1.0.0"
+                    "description": "0.1.0"
                 },
                 "lastUpdate": {
                     "title": "Última actualización",
-                    "description": "2024-06-01"
+                    "description": "2026-07-22"
                 },
                 "license": {
                     "title": "Licencia",
                     "description": "MIT"
+                },
+                "launchers": {
+                    "title": "Launchers soportados",
+                    "description": "Estos son los launchers que la aplicación soporta actualmente.",
+                    "list": {
+                        "steam": "Steam",
+                        "epicGames": "Epic Games",
+                        "riotClient": "Riot Client"
+                    }
                 },
                 "github": {
                     "title": "GitHub",
@@ -70,7 +92,14 @@
                 }
             }
         },
-        "donate": "Si te gusta la aplicación, considera donar un café.",
+        "donate": "Este proyecto fue desarrollado por una sola persona. Si te gusta, considera donar un café.",
+        "github": "Ver el proyecto en GitHub.",
+        "position": "Posición",
+        "positionOptions": {
+            "bottomCenter": "Abajo - Centro",
+            "bottomLeft": "Abajo - Izquierda",
+            "center": "Centro"
+        },
         "theme": "Tema",
         "themeOptions": {
             "light": "Claro",
@@ -89,7 +118,7 @@
             "12": "12 horas",
             "24": "24 horas"
         },
-        "deleteData": "Eliminar datos",
+        "deleteData": "Eliminar todos los datos",
         "deleteDataConfirmTitle": "¿Eliminar datos?",
         "deleteDataConfirmDescription": "Esta acción eliminará todos los datos de la aplicación y reestablecerá la configuración a los valores predeterminados. Esta acción no se puede deshacer.",
         "cancel": "Cancelar",

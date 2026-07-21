@@ -2,7 +2,7 @@
 * General settings component
 */
 
-import SettingsPage from "@/components/settings/SettingsPage";
+import SettingsPage from "@/components/settings/SettingsLayout";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,13 @@ export default function GeneralSettings() {
     const { settings, updateSettings, resetSettings } = useSettings();
     
     // Constants
+
+    const POSITION_OPTIONS = [
+        { value: "bottom-center", label: t("settings.positionOptions.bottomCenter") },
+        { value: "bottom-left", label: t("settings.positionOptions.bottomLeft") },
+        { value: "center", label: t("settings.positionOptions.center") },
+    ];
+
     const THEME_OPTIONS = [
         { value: "light", label: t("settings.themeOptions.light") },
         { value: "dark", label: t("settings.themeOptions.dark") },
@@ -70,6 +77,31 @@ export default function GeneralSettings() {
             description={t("settings.tabs.general.description")}
         >
         <div className="flex flex-col gap-8">
+            {/* Position */}
+            <div className="flex flex-col gap-2">
+                <Label htmlFor="position">{t("settings.position")}</Label>
+                <Select
+                    items={POSITION_OPTIONS}
+                    value={settings.position}
+                    onValueChange={(value) => {
+                        if (value) updateSettings({ position: value });
+                    }}
+                >
+                    <SelectTrigger className="w-full max-w-1/2">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            {POSITION_OPTIONS.map((item) => (
+                                <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+            </div>
+
             {/* Theme */}
             <div className="flex flex-col gap-2">
                 <Label htmlFor="theme">{t("settings.theme")}</Label>
