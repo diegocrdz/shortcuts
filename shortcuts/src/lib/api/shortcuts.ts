@@ -48,7 +48,7 @@ export async function createShortcut() {
             is_favorite: false,
             tags: [],
             icon_path: null,
-            category: "others"
+            category: "",
         };
 
         const updated = await invoke<Shortcut[]>("create_shortcut", { shortcut: newShortcut });

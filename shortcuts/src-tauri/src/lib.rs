@@ -7,6 +7,7 @@
 mod shortcuts;
 mod excluded;
 mod tags;
+mod categories;
 mod steam;
 mod epic_games;
 mod riot;
@@ -59,6 +60,12 @@ pub fn run() {
             tags::create_tag,
             tags::update_tag,
             tags::delete_tag,
+            tags::reorder_tags,
+            categories::get_categories,
+            categories::create_category,
+            categories::update_category,
+            categories::delete_category,
+            categories::reorder_categories,
             scanner::scan_installed_games,
             scanner::sync_shortcuts,
             settings::get_settings,

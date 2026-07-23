@@ -82,3 +82,10 @@ pub fn delete_tag(app: AppHandle, id: String) -> Result<Vec<Tag>, String> {
 
     Ok(tags)
 }
+
+// Reorder tags
+#[tauri::command]
+pub fn reorder_tags(app: AppHandle, tags: Vec<Tag>) -> Result<Vec<Tag>, String> {
+    save_tags(&app, &tags)?;
+    Ok(tags)
+}

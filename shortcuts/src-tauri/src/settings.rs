@@ -5,6 +5,7 @@
 use tauri::AppHandle;
 use crate::shortcuts::{Shortcut, save};
 use crate::tags::{Tag, save_tags};
+use crate::categories::{Category, save_categories};
 use crate::excluded::clear_excluded;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -17,6 +18,7 @@ pub struct Settings {
     pub language: String, // "en" | "es"
     pub update_interval: u32, // hours between automatic sync with game launchers
     pub position: String, // "bottom-center" | "bottom-left" | "center"
+    pub show_onboarding: bool, // Show onboarding screen on first launch
 }
 
 // Detect the system language
@@ -40,6 +42,7 @@ impl Default for Settings {
             language: detect_system_language(),
             update_interval: 6,
             position: "bottom-center".into(),
+            show_onboarding: true,
         }
     }
 }
@@ -94,13 +97,21 @@ pub fn delete_tags(app: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+// Delete all categories
+// Writes an empty array to the categories.json file
+pub fn delete_categories(app: AppHandle) -> Result<(), String> {
+    save_categories(&app, &Vec::<Category>::new())?;
+    Ok(())
+}
+
 // Reset all settings
 // Deletes the shortcuts.json and tags.json files
 #[tauri::command]
 pub fn reset_settings(app: AppHandle) -> Result<Settings, String> {
-    // Delete all shortcuts and tags
+    // Delete shortcuts, tags, and categories
     delete_shortcuts(app.clone())?;
     delete_tags(app.clone())?;
+    delete_categories(app.clone())?;
 
     // Clear the excluded list
     clear_excluded(app.clone())?;

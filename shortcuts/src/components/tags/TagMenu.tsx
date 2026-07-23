@@ -16,15 +16,24 @@ interface Props {
   color: string;
   onNameChange: (name: string) => void;
   onColorChange: (color: string) => void;
-  onSubmit: () => void; // "Crear" en modo create, no se usa en modo edit
-  onDelete?: () => void; // solo modo edit
+  onSubmit: () => void;
+  onDelete?: () => void; // Only required in edit mode
 }
 
-export default function TagMenu({ mode, name, color, onNameChange, onColorChange, onSubmit, onDelete }: Props) {
+export default function TagMenu({
+    mode,
+    name,
+    color,
+    onNameChange,
+    onColorChange,
+    onSubmit,
+    onDelete
+}: Props) {
     const { t } = useTranslation();
 
     return (
         <div className="flex flex-col gap-2 w-48">
+            {/* Name input */}
             <Label>{t("tags.name")}</Label>
             <Input
                 autoFocus
@@ -35,6 +44,7 @@ export default function TagMenu({ mode, name, color, onNameChange, onColorChange
                 onKeyDown={(e) => e.stopPropagation()}
             />
 
+            {/* Color selection */}
             <Label>{t("tags.color")}</Label>
             <div className="flex gap-2 flex-wrap justify-between">
                 {COLORS.map((c) => (
@@ -48,7 +58,8 @@ export default function TagMenu({ mode, name, color, onNameChange, onColorChange
                     </div>
                 ))}
             </div>
-
+            
+            {/* Actions */}
             {mode === "create" ? (
                 <Button onClick={onSubmit} disabled={name.trim() === ""}>
                     <Plus />

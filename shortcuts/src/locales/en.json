@@ -1,4 +1,33 @@
 {
+    "onboarding": {
+        "actions": {
+            "next": "Next",
+            "skip": "Skip",
+            "sync": "Sync now",
+            "scanning": "Syncing...",
+            "scanComplete": "Sync complete",
+            "noShortcuts": "No shortcuts found. You can sync again later within the app.",
+            "start": "Start",
+            "finish": "Let's go!"
+        },
+        "step1": {
+            "title": "Welcome to Shortcuts!",
+            "description": "Manage and organize your apps and games in one place."
+        },
+        "step2": {
+            "title": "Sync your games",
+            "description": "Import your games from Steam, Epic Games, and Riot Client. You can do this now or later within the app."
+        },
+        "step3": {
+            "title": "All set",
+            "description": "You can now start using Shortcuts."
+        }
+    },
+    "actions": {
+        "create": "Create",
+        "edit": "Edit",
+        "delete": "Delete"
+    },
     "table": {
         "search": "Search...",
         "noData": "No data"
@@ -8,7 +37,7 @@
         "favorite": "Favorite",
         "tags": "Tags",
         "noTags": "No tags",
-        "category": "Move",
+        "category": "Move to...",
         "delete": "Delete",
         "categories": {
             "all": "All",
@@ -23,8 +52,9 @@
             "launchError": "Error opening",
             "selected": "selected",
             "restore": "Restore",
-            "scanning": "Scanning...",
-            "scanComplete": "Scan complete",
+            "sync": "Sync shortcuts",
+            "scanning": "Syncing...",
+            "scanComplete": "Sync complete",
             "shortcutCreated": "Shortcut created",
             "shortcutUpdated": "Shortcut updated",
             "shortcutDeleted": "Shortcut deleted"
@@ -47,6 +77,29 @@
             "tagDeleted": "Tag deleted"
         }
     },
+    "categories": {
+        "noCategories": "No categories",
+        "create": "Add",
+        "edit": "Edit",
+        "delete": "Delete",
+        "name": "Name",
+        "namePlaceholder": "Category name",
+        "icon": "Icon",
+        "actions": {
+            "categoryCreated": "Category created",
+            "categoryUpdated": "Category updated",
+            "categoryDeleted": "Category deleted"
+        },
+        "defaultCategories": {
+            "all": "All",
+            "favourites": "Favorites",
+            "uncategorized": "Uncategorized"
+        },
+        "manage": {
+            "title": "Categories",
+            "count": "Category(s)"
+        }
+    },
     "searchBar": {
         "placeholder": "Search shortcuts..."
     },
@@ -66,7 +119,7 @@
                 "description": "Information about the application.",
                 "version": {
                     "title": "Version",
-                    "description": "0.1.0"
+                    "description": "0.2.0"
                 },
                 "lastUpdate": {
                     "title": "Last update",
@@ -118,7 +171,7 @@
             "12": "12 hours",
             "24": "24 hours"
         },
-        "deleteData": "Delete all data",
+        "deleteData": "Delete data",
         "deleteDataConfirmTitle": "Delete data?",
         "deleteDataConfirmDescription": "This will delete all application data and reset settings to their default values. This cannot be undone.",
         "cancel": "Cancel",

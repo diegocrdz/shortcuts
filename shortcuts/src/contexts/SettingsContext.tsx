@@ -7,15 +7,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { getCurrentWindow, currentMonitor, LogicalPosition } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
-import { Theme } from "@/types";
+import { Theme, Settings } from "@/types";
 import i18n from "@/i18n";
-
-interface Settings {
-    theme: Theme;
-    language: string;
-    update_interval: number;
-    position: string;
-}
 
 interface SettingsContextValue {
     settings: Settings;

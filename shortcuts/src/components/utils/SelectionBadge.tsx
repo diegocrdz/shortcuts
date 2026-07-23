@@ -1,0 +1,93 @@
+/**
+ * Selection badge that dispays the number of selected items and allows
+ * performing actions on them (e.g., delete, favorite, etc.)
+ */
+
+import { TFunction } from "i18next";
+import { Category } from "@/types";
+import { CategoryIcon } from "@/components/categories/CategoryIcon";
+import { Button } from "@/components/ui/button";
+import { X, Folder, Trash } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+type SelectionBadgeProps = {
+    t: TFunction;
+    selectedCount: number;
+    categories: Category[];
+    onClearSelection?: () => void;
+    onCategoryChange?: (categoryId: string) => void;
+    onDelete?: () => void;
+};
+
+export default function SelectionBadge({
+    t,
+    selectedCount,
+    categories,
+    onClearSelection,
+    onCategoryChange,
+    onDelete,
+}: SelectionBadgeProps) {
+    return (
+        <div className="fixed bottom-20 right-8 z-50 flex items-center gap-2 rounded-md bg-primary p-1">
+            {/* Close button */}
+            <Button
+                size="icon"
+                onClick={onClearSelection}
+            >
+                <X />
+            </Button>
+
+            {/* Selected count */}
+            <span className="text-secondary text-sm font-medium">
+                {selectedCount} {t("shortcuts.actions.selected")}
+            </span>
+
+            {/* Category button */}
+            {onClearSelection && (
+                <DropdownMenu>
+                    <DropdownMenuTrigger>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <Folder />
+                            {t("shortcuts.category")}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        {categories.length > 0 ? (
+                            categories.map((category) => (
+                                <DropdownMenuItem key={category.id} onClick={() => onCategoryChange?.(category.id)}>
+                                    <CategoryIcon name={category.icon} />
+                                    {category.name}
+                                </DropdownMenuItem>
+                            ))
+                        ) : (
+                            <DropdownMenuItem disabled>
+                                {t("categories.noCategories")}
+                            </DropdownMenuItem>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
+
+            {/* Delete button */}
+            {onDelete && (
+                <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={onDelete}
+                >
+                    <Trash />
+                    {t("actions.delete")}
+                </Button>
+            )}
+        </div>
+    );
+}

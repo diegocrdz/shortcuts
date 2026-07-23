@@ -21,3 +21,18 @@ export interface Tag {
   name: string;
   color: string;
 }
+
+export interface Category {
+  id: string;
+  name: string;
+  icon: string;
+  deletable: boolean;
+}
+
+export interface Settings {
+  theme: Theme;
+  language: string; // "en" | "es"
+  update_interval: number; // hours between automatic sync with game launchers
+  position: string; // "bottom-center" | "bottom-left" | "center"
+  show_onboarding: boolean; // Show onboarding screen on first launch
+}

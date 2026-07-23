@@ -2,11 +2,11 @@
  * Individual shortcut tile component that displays the shortcut's name and icon.
  */
 
-import { Shortcut } from "@/types";
-import { Tag } from "@/types";
+import { Shortcut, Tag, Category } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     ContextMenu,
     ContextMenuLabel,
@@ -35,7 +35,11 @@ import {
 
 interface Props {
     shortcut: Shortcut;
+    selected: boolean;
     tags: Tag[];
+    categories: Category[];
+    onSelect: (shortcutId: string) => void;
+    onClearSelection?: () => void;
     onLaunch: (shortcut: Shortcut) => void;
     onRemove: (id: string) => void;
     onUpdate: (shortcut: Shortcut) => void;
@@ -43,7 +47,10 @@ interface Props {
 
 export default function ShortcutTile({
     shortcut,
+    selected,
     tags,
+    categories,
+    onSelect,
     onLaunch,
     onRemove,
     onUpdate
@@ -59,16 +66,31 @@ export default function ShortcutTile({
             <ContextMenuTrigger>
                 <div
                     onClick={() => onLaunch(shortcut)}
-                    className="
-                        flex flex-col items-center justify-start gap-2
-                        h-22 cursor-pointer bg-transparent hover:bg-primary/10 rounded-md p-2
+                    className={`
+                        group relative flex flex-col items-center justify-start gap-2
+                        h-22 cursor-pointer hover:bg-primary/10 rounded-md p-2 border
                         transition-colors duration-200 ease-in-out
-                    "
+                        ${selected ? "bg-primary/10 border-border" : "border-transparent"}
+                    `}
                 >
+                    {/* Selection Checkbox */}
+                    <div
+                        className={`absolute top-1 left-1 z-20 transition-opacity
+                            ${selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
+                        `}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <Checkbox
+                            checked={selected}
+                            onCheckedChange={() => onSelect(shortcut.id)}
+                        />
+                    </div>
+
                     {/* Icon */}
                     <div className="relative">
+                        {/* Image */}
                         {iconSrc ? (
-                            <img src={iconSrc} alt={shortcut.name} className="max-h-full max-w-full" />
+                            <img src={iconSrc} alt={shortcut.name} className="h-8 w-8" />
                         ) : shortcut.category === "launchers" ? (
                             <Rocket size={32} className="text-muted-foreground" />
                         ) : shortcut.category === "games" ? (
@@ -82,6 +104,7 @@ export default function ShortcutTile({
                             <Star size={16} className="size-3 absolute -top-1 -right-2 fill-yellow-400 text-yellow-400" />
                         )}
                     </div>
+
                     {/* Name */}
                     <p className="text-xs text-center line-clamp-2 w-full wrap-break-word">
                         {shortcut.name}
@@ -178,11 +201,19 @@ export default function ShortcutTile({
                     <ContextMenuSubContent>
                         <ContextMenuRadioGroup
                             value={shortcut.category}
-                            onValueChange={(category) => onUpdate({ ...shortcut, category: category as Shortcut["category"] })}
+                            onValueChange={(value) => onUpdate({ ...shortcut, category: value })}
                         >
-                            <ContextMenuRadioItem value="launchers">{t("shortcuts.categories.launchers")}</ContextMenuRadioItem>
-                            <ContextMenuRadioItem value="games">{t("shortcuts.categories.games")}</ContextMenuRadioItem>
-                            <ContextMenuRadioItem value="others">{t("shortcuts.categories.others")}</ContextMenuRadioItem>
+                            {categories.length > 0 ? (
+                                categories.map((category) => (
+                                    <ContextMenuRadioItem key={category.id} value={category.id}>
+                                        {category.name}
+                                    </ContextMenuRadioItem>
+                                ))
+                            ) : (
+                                <ContextMenuItem disabled>
+                                    {t("categories.noCategories")}
+                                </ContextMenuItem>
+                            )}
                         </ContextMenuRadioGroup>
                     </ContextMenuSubContent>
                 </ContextMenuSub>

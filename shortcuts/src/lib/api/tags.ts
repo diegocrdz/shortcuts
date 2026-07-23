@@ -22,3 +22,7 @@ export async function updateTag(tag: Tag) {
 export async function deleteTag(id: string) {
     return await invoke<Tag[]>("delete_tag", { id });
 }
+
+export async function reorderTags(tags: Tag[]) {
+    return await invoke<Tag[]>("reorder_tags", { tags });
+}

@@ -4,6 +4,7 @@
 
 use crate::excluded;
 use crate::epic_games::epic_launcher_exe;
+use crate::categories;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
@@ -19,7 +20,6 @@ pub const SOURCE_RIOT: &str = "riot";
 
 pub const CATEGORY_LAUNCHERS: &str = "launchers";
 pub const CATEGORY_GAMES: &str = "games";
-pub const CATEGORY_OTHERS: &str = "others";
 
 // Shortcut struct
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -32,7 +32,7 @@ pub struct Shortcut {
     pub source: String,       // "manual" | "steam" | "epic" | "riot"
     pub is_favorite: bool,
     pub tags: Vec<String>, // Tags for categorization
-    pub category: String, // "launchers" | "games" | "others"
+    pub category: String, // "launchers" | "games" | custom categories
 }
 
 pub fn build_shortcut(
@@ -117,6 +117,15 @@ pub fn get_shortcuts(app: AppHandle) -> Vec<Shortcut> {
     load(&app)
 }
 
+// Helper function to get default category name and icon based on category ID
+fn category_defaults(id: &str) -> (&'static str, &'static str) {
+    match id {
+        CATEGORY_LAUNCHERS => ("Launchers", "rocket"),
+        CATEGORY_GAMES => ("Games", "gamepad"),
+        _ => ("", "Folder"),
+    }
+}
+
 // Create shortcut
 #[tauri::command]
 pub fn create_shortcut(app: AppHandle, mut shortcut: Shortcut) -> Result<Vec<Shortcut>, String> {
@@ -127,8 +136,17 @@ pub fn create_shortcut(app: AppHandle, mut shortcut: Shortcut) -> Result<Vec<Sho
         return Ok(list);
     }
 
+    // If the shortcut was manually added,
+    // try to extract the icon from the target executable
     if shortcut.source == SOURCE_MANUAL && shortcut.icon_path.is_none() {
         shortcut.icon_path = extract_icon_from_exe(&app, &shortcut.target, &shortcut.id);
+    }
+
+    // Only auto-create a category if the shortcut actually has one assigned.
+    // An empty category means "uncategorized" and should never become a real category.
+    if !shortcut.category.is_empty() {
+        let (name, icon) = category_defaults(&shortcut.category);
+        categories::ensure_category_exists(&app, &shortcut.category, name, icon);
     }
 
     list.push(shortcut);
@@ -196,7 +214,7 @@ fn wait_for_process(process_name: &str, timeout_secs: u64) -> bool {
 pub fn launch_shortcut(shortcut: Shortcut) -> Result<(), String> {
     // If the shortcut is an Epic Games game,
     // ensure the Epic Games Launcher is running before launching the game
-    if shortcut.source == SOURCE_EPIC && shortcut.category == CATEGORY_GAMES {
+    if shortcut.source == SOURCE_EPIC {
         if !is_process_running("EpicGamesLauncher.exe") {
             if let Some(launcher_exe) = epic_launcher_exe() {
                 std::process::Command::new(&launcher_exe)

@@ -1,4 +1,33 @@
 {
+    "onboarding": {
+        "actions": {
+            "next": "Siguiente",
+            "skip": "Quizá más tarde",
+            "sync": "Sincronizar ahora",
+            "scanning": "Sincronizando...",
+            "scanComplete": "Sincronización completa",
+            "noShortcuts": "No se encontraron atajos. Puedes volver a sincronizar más tarde dentro de la aplicación.",
+            "start": "Comenzar",
+            "finish": "¡Vamos!"
+        },
+        "step1": {
+            "title": "Bienvenido a Shortcuts",
+            "description": "Gestiona y organiza tus aplicaciones y juegos en un solo lugar."
+        },
+        "step2": {
+            "title": "Sincroniza tus juegos",
+            "description": "Importa tus juegos desde Steam, Epic Games y Riot Client. Puedes hacerlo ahora o más tarde dentro de la aplicación."
+        },
+        "step3": {
+            "title": "Todo listo",
+            "description": "Ahora puedes empezar a usar Shortcuts."
+        }
+    },
+    "actions": {
+        "create": "Crear",
+        "edit": "Editar",
+        "delete": "Eliminar"
+    },
     "table": {
         "search": "Buscar...",
         "noData": "No hay datos"
@@ -8,7 +37,7 @@
         "favorite": "Favorito",
         "tags": "Etiquetas",
         "noTags": "Sin etiquetas",
-        "category": "Mover",
+        "category": "Mover a...",
         "delete": "Eliminar",
         "categories": {
             "all": "Todos",
@@ -23,8 +52,9 @@
             "launchError": "Error al abrir",
             "selected": "seleccionado(s)",
             "restore": "Restaurar",
-            "scanning": "Escaneando...",
-            "scanComplete": "Escaneo completo",
+            "sync": "Sincronizar atajos",
+            "scanning": "Sincronizando...",
+            "scanComplete": "Sincronización completa",
             "shortcutCreated": "Atajo creado",
             "shortcutUpdated": "Atajo actualizado",
             "shortcutDeleted": "Atajo eliminado"
@@ -47,6 +77,29 @@
             "tagDeleted": "Etiqueta eliminada"
         }
     },
+    "categories": {
+        "noCategories": "Sin categorías",
+        "create": "Agregar",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "name": "Nombre",
+        "namePlaceholder": "Nombre de la categoría",
+        "icon": "Icono",
+        "actions": {
+            "categoryCreated": "Categoría creada",
+            "categoryUpdated": "Categoría actualizada",
+            "categoryDeleted": "Categoría eliminada"
+        },
+        "defaultCategories": {
+            "all": "Todos",
+            "favourites": "Favoritos",
+            "uncategorized": "Sin categoría"
+        },
+        "manage": {
+            "title": "Categorías",
+            "count": "Categoría(s)"
+        }
+    },
     "searchBar": {
         "placeholder": "Buscar atajos..."
     },
@@ -66,7 +119,7 @@
                 "description": "Información sobre la aplicación.",
                 "version": {
                     "title": "Versión",
-                    "description": "0.1.0"
+                    "description": "0.2.0"
                 },
                 "lastUpdate": {
                     "title": "Última actualización",
@@ -118,7 +171,7 @@
             "12": "12 horas",
             "24": "24 horas"
         },
-        "deleteData": "Eliminar todos los datos",
+        "deleteData": "Eliminar datos",
         "deleteDataConfirmTitle": "¿Eliminar datos?",
         "deleteDataConfirmDescription": "Esta acción eliminará todos los datos de la aplicación y reestablecerá la configuración a los valores predeterminados. Esta acción no se puede deshacer.",
         "cancel": "Cancelar",
