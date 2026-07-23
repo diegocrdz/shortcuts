@@ -4,8 +4,6 @@
             "next": "Siguiente",
             "skip": "Quizá más tarde",
             "sync": "Sincronizar ahora",
-            "scanning": "Sincronizando...",
-            "scanComplete": "Sincronización completa",
             "noShortcuts": "No se encontraron atajos. Puedes volver a sincronizar más tarde dentro de la aplicación.",
             "start": "Comenzar",
             "finish": "¡Vamos!"

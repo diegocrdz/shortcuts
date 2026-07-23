@@ -4,8 +4,6 @@
             "next": "Next",
             "skip": "Skip",
             "sync": "Sync now",
-            "scanning": "Syncing...",
-            "scanComplete": "Sync complete",
             "noShortcuts": "No shortcuts found. You can sync again later within the app.",
             "start": "Start",
             "finish": "Let's go!"

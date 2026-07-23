@@ -150,18 +150,8 @@ export default function Onboarding({
                                     <ArrowRight />
                                 </Button>
                                 <Button onClick={handleScanGames} disabled={isScanning}>
-                                    {isScanning
-                                        ? t("onboarding.actions.scanning")
-                                        : scanCompleted
-                                            ? t("onboarding.actions.scanComplete")
-                                            : t("onboarding.actions.sync")
-                                    }
-                                    {isScanning
-                                        ? <RefreshCcw className="animate-spin" />
-                                        : scanCompleted
-                                            ? <Check />
-                                            : <ArrowRight />
-                                    }
+                                    {t("onboarding.actions.sync")}
+                                    <RefreshCcw />
                                 </Button>
                             </>
                         }
@@ -178,18 +168,18 @@ export default function Onboarding({
                         description={t("onboarding.step3.description", { count: shortcuts.length })}
                         content={
                             <ul className="flex flex-col gap-1 text-sm">
-                                {shortcuts.length > 0 ? (
+                                {scanCompleted && shortcuts.length > 0 ? (
                                     shortcuts.map((s) => (
                                         <li key={s.id} className="flex items-center gap-2 px-2 py-1 rounded bg-muted/50">
                                             <Check className="w-4 h-4 text-brand shrink-0" />
                                             <span className="truncate">{s.name}</span>
                                         </li>
                                     ))
-                                ) : (
+                                ) : scanCompleted && shortcuts.length === 0 ? (
                                     <li className="px-2 py-1 rounded bg-muted/50">
                                         {t("onboarding.actions.noShortcuts")}
                                     </li>
-                                )}
+                                ) : null}
                             </ul>
                         }
                         actions={
