@@ -4,6 +4,7 @@
 
 use crate::shortcuts::{game_shortcut, launcher_shortcut, extract_icon_from_exe, Shortcut, SOURCE_RIOT};
 use std::env;
+use std::collections::HashSet;
 use std::path::PathBuf;
 use tauri::AppHandle;
 
@@ -34,7 +35,7 @@ fn riot_client_paths() -> Vec<PathBuf> {
 }
 
 // Scan for Riot Client and games, returning a list of detected shortcuts
-pub fn scan_riot(app: &AppHandle) -> Vec<Shortcut> {
+pub fn scan_riot(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcut> {
     let mut results = Vec::new();
 
     let client_path = first_existing(riot_client_paths());
@@ -53,10 +54,13 @@ pub fn scan_riot(app: &AppHandle) -> Vec<Shortcut> {
 
     // For each Riot game, if the executable exists, create a shortcut
     for (name, patchline_id, exe_candidates) in riot_products {
+        let id = format!("riot-{}", name.to_lowercase().replace(' ', "-"));
+        if excluded_ids.contains(&id) { continue; } // Skip excluded shortcuts
+
         if let Some(exe) = first_existing(exe_candidates) {
             if let Some(client) = &client_path {
                 let mut shortcut = game_shortcut(
-                    format!("riot-{}", name.to_lowercase().replace(' ', "-")),
+                    id,
                     name,
                     client.to_string_lossy().to_string(), // target = Riot Client
                     SOURCE_RIOT,
@@ -70,16 +74,17 @@ pub fn scan_riot(app: &AppHandle) -> Vec<Shortcut> {
 
     // Legends of Runeterra doesn't use Vanguard,
     // so we can launch it directly if the executable exists
-    if let Some(exe) = first_existing(vec![
-        // Check the default installation path for Legends of Runeterra
-        riot_roots().iter().map(|r| r.join("Legends of Runeterra").join("LegendsOfRuneterra.exe")).collect(),
-    ]) {
-        results.push(game_shortcut(
-            "riot-legends-of-runeterra",
-            "Legends of Runeterra",
-            exe.to_string_lossy().to_string(),
-            SOURCE_RIOT,
-        ));
+    if !excluded_ids.contains("riot-legends-of-runeterra") {
+        if let Some(exe) = first_existing(vec![
+            riot_roots().iter().map(|r| r.join("Legends of Runeterra").join("LegendsOfRuneterra.exe")).collect(),
+        ]) {
+            results.push(game_shortcut(
+                "riot-legends-of-runeterra",
+                "Legends of Runeterra",
+                exe.to_string_lossy().to_string(),
+                SOURCE_RIOT,
+            ));
+        }
     }
 
     results

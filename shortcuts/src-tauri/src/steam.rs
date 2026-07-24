@@ -6,6 +6,7 @@ use crate::shortcuts::{game_shortcut, launcher_shortcut, extract_icon_from_exe, 
 use std::fs;
 use std::path::PathBuf;
 use std::path::Path;
+use std::collections::HashSet;
 use tauri::AppHandle;
 
 /// Extract the value of a key from a VDF (Valve Data Format) string
@@ -61,7 +62,7 @@ fn save_steam_game_icon(app: &AppHandle, steam_path: &Path, appid: &str) -> Opti
 }
 
 // Scan for installed Steam games and return them as a list of shortcuts
-pub fn scan_steam(app: &AppHandle) -> Vec<Shortcut> {
+pub fn scan_steam(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcut> {
     let mut results = Vec::new();
     let Some(steam_path) = steam_install_path() else { return results; };
 
@@ -87,8 +88,11 @@ pub fn scan_steam(app: &AppHandle) -> Vec<Shortcut> {
             let Ok(content) = fs::read_to_string(&path) else { continue; };
             let (Some(name), Some(appid)) = (vdf_value(&content, "name"), vdf_value(&content, "appid")) else { continue; };
 
+            let id = format!("steam-{}", appid);
+            if excluded_ids.contains(&id) { continue; } // Skip excluded shortcuts
+
             let mut shortcut = game_shortcut(
-                format!("steam-{}", appid),
+                id,
                 name,
                 format!("steam://rungameid/{}", appid),
                 SOURCE_STEAM,

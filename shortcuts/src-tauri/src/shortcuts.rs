@@ -154,6 +154,13 @@ pub fn create_shortcut(app: AppHandle, mut shortcut: Shortcut) -> Result<Vec<Sho
     Ok(list)
 }
 
+// Delete the icon file associated with a shortcut, if it has one.
+pub fn remove_shortcut_icon(shortcut: &Shortcut) {
+    if let Some(icon_path) = &shortcut.icon_path {
+        let _ = fs::remove_file(icon_path);
+    }
+}
+
 // Delete shortcut
 #[tauri::command]
 pub fn delete_shortcut(app: AppHandle, id: String) -> Result<Vec<Shortcut>, String> {
@@ -164,6 +171,7 @@ pub fn delete_shortcut(app: AppHandle, id: String) -> Result<Vec<Shortcut>, Stri
         if shortcut.source != SOURCE_MANUAL {
             excluded::add(app.clone(), shortcut.clone())?;
         }
+        remove_shortcut_icon(shortcut);
     }
 
     // Remove the shortcut from the list

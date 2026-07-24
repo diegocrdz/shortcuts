@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use std::fs;
 use tauri::AppHandle;
 use std::path::Path;
+use std::collections::HashSet;
 
 // EpicManifest struct to deserialize the JSON manifest files
 #[derive(Debug, Deserialize)]
@@ -87,7 +88,7 @@ fn find_and_extract_icon(app: &AppHandle, exe_dir: &Path, id: &str) -> Option<St
 }
 
 // Scan for installed Epic Games and return them as a list of shortcuts
-pub fn scan_epic(app: &AppHandle) -> Vec<Shortcut> {
+pub fn scan_epic(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcut> {
     let mut results = Vec::new();
 
     // Launcher
@@ -117,6 +118,9 @@ pub fn scan_epic(app: &AppHandle) -> Vec<Shortcut> {
 
         let (Some(name), Some(app_name)) = (manifest.display_name.clone(), manifest.app_name.clone()) else { continue; };
 
+        let id = format!("epic-{}", app_name);
+        if excluded_ids.contains(&id) { continue; } // Skip excluded shortcuts
+
         let target = match (&manifest.catalog_namespace, &manifest.catalog_item_id) {
             (Some(ns), Some(item_id)) if !ns.is_empty() && !item_id.is_empty() => {
                 format!("com.epicgames.launcher://apps/{}%3A{}%3A{}?action=launch&silent=true", ns, item_id, app_name)
@@ -124,7 +128,12 @@ pub fn scan_epic(app: &AppHandle) -> Vec<Shortcut> {
             _ => format!("com.epicgames.launcher://apps/{}?action=launch&silent=true", app_name),
         };
 
-        let mut shortcut = game_shortcut(format!("epic-{}", app_name), name, target, SOURCE_EPIC);
+        let mut shortcut = game_shortcut(
+            id,
+            name,
+            target,
+            SOURCE_EPIC
+        );
 
         // If the manifest has an install location and launch executable, try to extract the icon from the actual executable
         if let (Some(install_location), Some(launch_exe)) = (&manifest.install_location, &manifest.launch_executable) {

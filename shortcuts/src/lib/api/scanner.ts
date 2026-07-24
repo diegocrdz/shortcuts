@@ -16,3 +16,7 @@ export async function scanGames(shortcuts: Shortcut[]) {
 
     return await invoke<Shortcut[]>("get_shortcuts");
 }
+
+export async function syncShortcuts() {
+    return await invoke<Shortcut[]>("sync_shortcuts");
+};

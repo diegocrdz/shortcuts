@@ -3,10 +3,11 @@
  */
 
 use crate::shortcuts;
-use crate::shortcuts::Shortcut;
+use crate::shortcuts::{Shortcut, remove_shortcut_icon};
 use crate::steam::scan_steam;
 use crate::epic_games::scan_epic;
 use crate::riot::scan_riot;
+use crate::excluded::{load as load_excluded};
 use std::collections::HashSet;
 use tauri::AppHandle;
 
@@ -34,14 +35,12 @@ fn source_rank(source: &str) -> u8 {
 // Scan for installed games and launchers from supported providers, returning a list of detected shortcuts
 #[tauri::command]
 pub fn scan_installed_games(app: AppHandle) -> Vec<Shortcut> {
-    let mut all = Vec::new();
-    all.extend(scan_steam(&app));
-    all.extend(scan_epic(&app));
-    all.extend(scan_riot(&app));
+    let excluded_ids: HashSet<String> = load_excluded(&app).into_iter().map(|s| s.id).collect();
 
-    // Exclude shortcuts that the user has explicitly removed
-    let excluded = crate::excluded::load(&app);
-    all.retain(|shortcut| !excluded.iter().any(|e| e.id == shortcut.id));
+    let mut all = Vec::new();
+    all.extend(scan_steam(&app, &excluded_ids));
+    all.extend(scan_epic(&app, &excluded_ids));
+    all.extend(scan_riot(&app, &excluded_ids));
 
     // Remove duplicates based on the shortcut ID, keeping the first occurrence
     let mut seen = std::collections::HashSet::new();
@@ -62,23 +61,32 @@ pub fn scan_installed_games(app: AppHandle) -> Vec<Shortcut> {
 // Sync the scanned shortcuts with the stored shortcuts, adding any new ones
 #[tauri::command]
 pub fn sync_shortcuts(app: AppHandle) -> Result<Vec<Shortcut>, String> {
-    let mut current = shortcuts::load(&app);
+    let current = shortcuts::load(&app);
+    let scanned = scan_installed_games(app.clone());
+
+    let scanned_ids: HashSet<String> = scanned.iter().map(|s| s.id.clone()).collect();
     let existing_ids: HashSet<String> = current.iter().map(|s| s.id.clone()).collect();
 
-    let scanned = scan_installed_games(app.clone());
-    let mut added = false;
+    // Delete icons for shortcuts that are no longer detected and not manual
+    current
+        .iter()
+        .filter(|s| s.source != shortcuts::SOURCE_MANUAL && !scanned_ids.contains(&s.id))
+        .for_each(remove_shortcut_icon);
 
-    // Add new shortcuts
+    // Always keep manual shortcuts
+    // and remove any that are no longer detected
+    let mut updated: Vec<Shortcut> = current
+        .into_iter()
+        .filter(|s| s.source == shortcuts::SOURCE_MANUAL || scanned_ids.contains(&s.id))
+        .collect();
+
+    // Add any new shortcuts that were detected
     for shortcut in scanned {
         if !existing_ids.contains(&shortcut.id) {
-            current.push(shortcut);
-            added = true;
+            updated.push(shortcut);
         }
     }
 
-    if added {
-        shortcuts::save(&app, &current)?;
-    }
-
-    Ok(current)
+    shortcuts::save(&app, &updated)?;
+    Ok(updated)
 }

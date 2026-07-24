@@ -29,7 +29,7 @@ import SelectionBadge from "@/components/utils/SelectionBadge";
 import { getTags, createTag, updateTag, deleteTag, reorderTags } from "@/lib/api/tags";
 import { getShortcuts, createShortcut, updateShortcut, deleteShortcut, launchShortcut } from "@/lib/api/shortcuts";
 import { getCategories, createCategory, updateCategory, deleteCategory, reorderCategories } from "@/lib/api/categories";
-import { scanGames } from "@/lib/api/scanner";
+import { syncShortcuts } from "@/lib/api/scanner";
 
 // Icons
 import { RotateCcw, Plus, Settings, LayoutGrid, Star, ChevronDown } from "lucide-react";
@@ -225,7 +225,7 @@ export default function Dashboard() {
     async function handleScanGames() {
         const updatedShortcuts = await withProgress(
             t("shortcuts.actions.scanning"),
-            scanGames(shortcuts)
+            syncShortcuts()
         );
         setShortcuts(updatedShortcuts);
         getCategories().then(setCategories);
