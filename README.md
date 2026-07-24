@@ -4,8 +4,6 @@
 
 A Windows desktop app that brings all your games and launchers together in one place. It automatically syncs your library from Steam, Epic Games, and Riot Client, and lets you organize everything with custom categories and tags so you can find and launch anything in seconds.
 
-![Shortcuts screenshot](/docs/screenshot.png)
-
 ## Features
 
 - **Automatic library sync** from Steam, Epic Games, and Riot Client.
