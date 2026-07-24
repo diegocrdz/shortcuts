@@ -55,7 +55,8 @@
             "scanComplete": "Sync complete",
             "shortcutCreated": "Shortcut created",
             "shortcutUpdated": "Shortcut updated",
-            "shortcutDeleted": "Shortcut deleted"
+            "shortcutDeleted": "Shortcut deleted",
+            "categoryChanged": "Category changed"
         },
         "columns": {
             "name": "Name",
@@ -117,11 +118,11 @@
                 "description": "Information about the application.",
                 "version": {
                     "title": "Version",
-                    "description": "0.2.0"
+                    "description": "0.3.0"
                 },
                 "lastUpdate": {
                     "title": "Last update",
-                    "description": "2026-07-22"
+                    "description": "2026-07-23"
                 },
                 "license": {
                     "title": "License",

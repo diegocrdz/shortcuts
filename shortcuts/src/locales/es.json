@@ -55,7 +55,8 @@
             "scanComplete": "Sincronización completa",
             "shortcutCreated": "Atajo creado",
             "shortcutUpdated": "Atajo actualizado",
-            "shortcutDeleted": "Atajo eliminado"
+            "shortcutDeleted": "Atajo eliminado",
+            "categoryChanged": "Categoría cambiada"
         },
         "columns": {
             "name": "Nombre",
@@ -117,11 +118,11 @@
                 "description": "Información sobre la aplicación.",
                 "version": {
                     "title": "Versión",
-                    "description": "0.2.0"
+                    "description": "0.3.0"
                 },
                 "lastUpdate": {
                     "title": "Última actualización",
-                    "description": "2026-07-22"
+                    "description": "2026-07-23"
                 },
                 "license": {
                     "title": "Licencia",
