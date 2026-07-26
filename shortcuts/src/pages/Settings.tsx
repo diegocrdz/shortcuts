@@ -54,7 +54,7 @@ export default function Settings() {
 
                 {/* Version */}
                 <div className="flex flex-col gap-2 mt-auto">
-                    <p className="text-sm text-muted-foreground">v{t("settings.tabs.about.version.description")}</p>
+                    <p className="text-sm text-muted-foreground">{t("settings.tabs.about.version.description")}</p>
                     <p className="text-xs text-muted-foreground">{t("settings.tabs.about.lastUpdate.description")}</p>
                 </div>
             </div>

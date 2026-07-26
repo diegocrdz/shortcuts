@@ -118,11 +118,11 @@
                 "description": "Information about the application.",
                 "version": {
                     "title": "Version",
-                    "description": "0.3.0"
+                    "description": "v0.3.1-alpha"
                 },
                 "lastUpdate": {
                     "title": "Last update",
-                    "description": "2026-07-23"
+                    "description": "2026-07-26"
                 },
                 "license": {
                     "title": "License",
@@ -163,12 +163,21 @@
             "en": "English",
             "es": "Spanish"
         },
-        "updateInterval": "Update interval",
+        "updateInterval": "Automatic sync",
+        "updateIntervalDescription": "Time interval at which the application will automatically sync shortcuts with external launchers.",
         "updateIntervalOptions": {
             "1": "1 hour",
             "6": "6 hours",
             "12": "12 hours",
             "24": "24 hours"
+        },
+        "lastSync": {
+            "title": "Last sync",
+            "never": "Never",
+            "justNow": "Just now",
+            "minutesAgo": "{{count}} minute(s) ago",
+            "hoursAgo": "{{count}} hour(s) ago",
+            "daysAgo": "{{count}} day(s) ago"
         },
         "deleteData": "Delete data",
         "deleteDataConfirmTitle": "Delete data?",

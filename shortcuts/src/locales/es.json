@@ -118,11 +118,11 @@
                 "description": "Información sobre la aplicación.",
                 "version": {
                     "title": "Versión",
-                    "description": "0.3.0"
+                    "description": "v0.3.1-alpha"
                 },
                 "lastUpdate": {
                     "title": "Última actualización",
-                    "description": "2026-07-23"
+                    "description": "2026-07-26"
                 },
                 "license": {
                     "title": "Licencia",
@@ -163,12 +163,21 @@
             "en": "Inglés",
             "es": "Español"
         },
-        "updateInterval": "Intervalo de actualización",
+        "updateInterval": "Sincronización automática",
+        "updateIntervalDescription": "Intervalo de tiempo en el que la aplicación sincronizará automáticamente los atajos con los launchers externos.",
         "updateIntervalOptions": {
             "1": "1 hora",
             "6": "6 horas",
             "12": "12 horas",
             "24": "24 horas"
+        },
+        "lastSync": {
+            "title": "Última sincronización",
+            "never": "Nunca",
+            "justNow": "Justo ahora",
+            "minutesAgo": "Hace {{count}} minuto(s)",
+            "hoursAgo": "Hace {{count}} hora(s)",
+            "daysAgo": "Hace {{count}} día(s)"
         },
         "deleteData": "Eliminar datos",
         "deleteDataConfirmTitle": "¿Eliminar datos?",

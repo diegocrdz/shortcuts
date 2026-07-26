@@ -45,7 +45,6 @@ function AppRoutes() {
     }, [navigate]);
 
     // Disable right-click context menu
-    /*
     useEffect(() => {
         function disableContextMenu(e: MouseEvent) {
             e.preventDefault();
@@ -55,7 +54,6 @@ function AppRoutes() {
             document.removeEventListener("contextmenu", disableContextMenu);
         };
     }, []);
-    */
 
     return (
         <main className="bg-card/40 h-full">

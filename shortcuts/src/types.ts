@@ -35,4 +35,6 @@ export interface Settings {
   update_interval: number; // hours between automatic sync with game launchers
   position: string; // "bottom-center" | "bottom-left" | "center"
   show_onboarding: boolean; // Show onboarding screen on first launch
+  last_sync: string | null; // Last time the shortcuts were synced with the game launchers
+  sync_enabled: boolean; // Whether automatic sync is enabled
 }

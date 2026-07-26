@@ -31,3 +31,4 @@ win32-version-info = "0.1"
 open = "5"
 sys-locale = "0.3"
 tauri-plugin-global-shortcut = "2.3.2"
+chrono = { version = "0.4.45", features = ["serde"] }

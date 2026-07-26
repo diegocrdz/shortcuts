@@ -6,9 +6,11 @@ import SettingsPage from "@/components/settings/SettingsLayout";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner"
 import { useSettings } from "@/contexts/SettingsContext";
 import { useTranslation } from "react-i18next";
+import { formatDate } from "@/components/utils/FormatDate";
 import {
     TrashIcon,
 } from "lucide-react";
@@ -153,16 +155,29 @@ export default function GeneralSettings() {
             </div>
             
             {/* Update Interval */}
-            <div className="flex flex-col gap-2">
-                <Label htmlFor="updateInterval">{t("settings.updateInterval")}</Label>
+            <div className="flex flex-col gap-2 max-w-1/2">
+                <div className="flex items-center justify-between">
+                    <Label htmlFor="updateInterval">{t("settings.updateInterval")}</Label>
+                    <Switch
+                        checked={settings.sync_enabled}
+                        onCheckedChange={(checked) => updateSettings({ sync_enabled: checked })}
+                    />
+                </div>
+
+                {/* Label */}
+                <p className="text-xs text-muted-foreground">
+                    {t("settings.updateIntervalDescription")}
+                </p>
+
                 <Select
                     items={UPDATE_INTERVAL_OPTIONS}
                     value={settings.update_interval}
+                    disabled={!settings.sync_enabled}
                     onValueChange={(value) => {
                         if (value) updateSettings({ update_interval: value });
                     }}
                 >
-                    <SelectTrigger className="w-full max-w-1/2">
+                    <SelectTrigger className="w-full">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -175,6 +190,9 @@ export default function GeneralSettings() {
                         </SelectGroup>
                     </SelectContent>
                 </Select>
+                <p className="text-sm text-muted-foreground">
+                    {t("settings.lastSync.title")}: {formatDate(t, settings.last_sync)}
+                </p>
             </div>
             
             {/* Reset Button */}

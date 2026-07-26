@@ -4,6 +4,7 @@
 
 use crate::shortcuts;
 use crate::shortcuts::{Shortcut, remove_shortcut_icon};
+use crate::settings::{load_settings, save_settings};
 use crate::steam::scan_steam;
 use crate::epic_games::scan_epic;
 use crate::riot::scan_riot;
@@ -87,6 +88,13 @@ pub fn sync_shortcuts(app: AppHandle) -> Result<Vec<Shortcut>, String> {
         }
     }
 
+    // Save the updated list of shortcuts
     shortcuts::save(&app, &updated)?;
+
+    // Update last sync timestamp in settings
+    let mut settings = load_settings(&app);
+    settings.last_sync = Some(chrono::Utc::now().to_rfc3339());
+    save_settings(&app, &settings)?;
+
     Ok(updated)
 }

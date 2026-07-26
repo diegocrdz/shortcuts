@@ -19,6 +19,8 @@ pub struct Settings {
     pub update_interval: u32, // hours between automatic sync with game launchers
     pub position: String, // "bottom-center" | "bottom-left" | "center"
     pub show_onboarding: bool, // Show onboarding screen on first launch
+    pub last_sync: Option<String>, // Last time the shortcuts were synced with the game launchers (ISO 8601 - e.g., "2023-01-01T12:00:00Z")
+    pub sync_enabled: bool, // Whether automatic sync is enabled
 }
 
 // Detect the system language
@@ -43,6 +45,8 @@ impl Default for Settings {
             update_interval: 6,
             position: "bottom-center".into(),
             show_onboarding: true,
+            last_sync: None,
+            sync_enabled: true,
         }
     }
 }

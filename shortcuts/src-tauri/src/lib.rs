@@ -94,13 +94,16 @@ pub fn run() {
             let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 loop {
-                    if let Ok(updated) = scanner::sync_shortcuts(app_handle.clone()) {
-                        // Emit an event to the frontend to notify that shortcuts have been synced
-                        let _ = app_handle.emit("shortcuts-synced", updated);
+                    let settings = settings::load_settings(&app_handle);
+
+                    if settings.sync_enabled {
+                        if let Ok(updated) = scanner::sync_shortcuts(app_handle.clone()) {
+                            // Emit an event to the frontend to notify that shortcuts have been synced
+                            let _ = app_handle.emit("shortcuts-synced", updated);
+                        }
                     }
 
                     // Sleep for the configured update interval before syncing again
-                    let settings = settings::load_settings(&app_handle);
                     let hours = settings.update_interval.max(1); // Ensure at least 1 hour
                     tokio::time::sleep(std::time::Duration::from_secs(hours as u64 * 3600)).await;
                 }
