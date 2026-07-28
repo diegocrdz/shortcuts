@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Tag } from "@/types";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { CirclePlus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import TagMenu from "@/components/tags/TagMenu";
 
@@ -30,10 +30,10 @@ export default function AddTag({ onCreate }: Props) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger>
-            <Badge variant="outline" className="cursor-pointer border-dashed border h-full">
-                <CirclePlus />
+            <Button variant="ghost" size="xs" className="cursor-pointer border-dashed border-primary/50 border rounded-full max-h-full">
+                <Plus className="h-full w-auto" />
                 {t("tags.create")}
-            </Badge>
+            </Button>
         </PopoverTrigger>
         <PopoverContent className="w-fit">
             <TagMenu

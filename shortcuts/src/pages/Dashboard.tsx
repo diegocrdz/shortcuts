@@ -347,7 +347,7 @@ export default function Dashboard() {
                     {/* Tags */}
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTagDragEnd}>
                         <SortableContext items={tags.map((t) => t.id)} strategy={horizontalListSortingStrategy}>
-                            <div className="flex gap-2">
+                            <div className="flex items-center flex-wrap gap-2 overflow-hidden">
                                 {tags.map((tag) => (
                                     <SortableTagBadge
                                         key={tag.id}

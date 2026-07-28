@@ -3,6 +3,7 @@
  */
 
 use crate::shortcuts::{game_shortcut, launcher_shortcut, extract_icon_from_exe, Shortcut, SOURCE_EPIC};
+use crate::utilities::find_install_location_from_uninstall;
 use serde::Deserialize;
 use std::path::PathBuf;
 use std::fs;
@@ -29,15 +30,19 @@ struct EpicManifest {
 
 // Get the Epic Games installation path by checking common directories
 fn epic_install_path() -> Option<PathBuf> {
+    // 1) Check the uninstall registry for Epic Games Launcher
+    if let Some(base) = find_install_location_from_uninstall("Epic Games Launcher") {
+        let full = base.join(r"Launcher\Portal\Binaries\Win64");
+        if full.exists() { return Some(full); }
+        if base.exists() { return Some(base); }
+    }
+
+    // 2) Fallback to common installation directories if the registry check fails
     let candidates = [
         r"C:\Program Files (x86)\Epic Games\Launcher\Portal\Binaries\Win64",
         r"C:\Program Files\Epic Games\Launcher\Portal\Binaries\Win64",
     ];
-
-    candidates
-        .iter()
-        .map(PathBuf::from)
-        .find(|p| p.exists())
+    candidates.iter().map(PathBuf::from).find(|p| p.exists())
 }
 
 // Get the path to the Epic Games Launcher executable
@@ -87,6 +92,12 @@ fn find_and_extract_icon(app: &AppHandle, exe_dir: &Path, id: &str) -> Option<St
     None
 }
 
+// Get the directory where Epic Games manifests are stored
+fn epic_manifests_dir() -> Option<PathBuf> {
+    let program_data = std::env::var("ProgramData").ok()?;
+    Some(PathBuf::from(program_data).join(r"Epic\EpicGamesLauncher\Data\Manifests"))
+}
+
 // Scan for installed Epic Games and return them as a list of shortcuts
 pub fn scan_epic(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcut> {
     let mut results = Vec::new();
@@ -104,7 +115,7 @@ pub fn scan_epic(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcu
 
     // Games
 
-    let manifests_dir = PathBuf::from(r"C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests");
+    let Some(manifests_dir) = epic_manifests_dir() else { return results; };
     let Ok(entries) = fs::read_dir(&manifests_dir) else { return results; };
 
     for entry in entries.flatten() {

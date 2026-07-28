@@ -65,11 +65,10 @@ export default function ShortcutTile({
         <ContextMenu>
             <ContextMenuTrigger>
                 <div
-                    onClick={() => onLaunch(shortcut)}
+                    onClick={() => selected ? onSelect(shortcut.id) : onLaunch(shortcut)}
                     className={`
                         group relative flex flex-col items-center justify-start gap-2
                         h-22 cursor-pointer hover:bg-primary/10 rounded-md p-2 border
-                        transition-colors duration-200 ease-in-out
                         ${selected ? "bg-primary/10 border-border" : "border-transparent"}
                     `}
                 >

@@ -8,6 +8,8 @@ use std::path::PathBuf;
 use std::path::Path;
 use std::collections::HashSet;
 use tauri::AppHandle;
+use winreg::enums::*;
+use winreg::RegKey;
 
 /// Extract the value of a key from a VDF (Valve Data Format) string
 fn vdf_value(content: &str, key: &str) -> Option<String> {
@@ -17,10 +19,27 @@ fn vdf_value(content: &str, key: &str) -> Option<String> {
     parts.get(3).map(|s| s.to_string())
 }
 
-// Get the Steam installation path by checking common directories
+// Get the Steam installation path by reading the Windows registry
+// stored in HKEY_CURRENT_USER\Software\Valve\Steam\SteamPath
 fn steam_install_path() -> Option<PathBuf> {
-    let candidates = [r"C:\Program Files (x86)\Steam", r"C:\Program Files\Steam"];
-    candidates.iter().map(PathBuf::from).find(|p| p.exists())
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    if let Ok(key) = hkcu.open_subkey(r"Software\Valve\Steam") {
+        if let Ok(path) = key.get_value::<String, _>("SteamPath") {
+            let p = PathBuf::from(path.replace('/', "\\"));
+            if p.exists() { return Some(p); }
+        }
+    }
+
+    // Check HKEY_LOCAL_MACHINE for 64-bit systems
+    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+    if let Ok(key) = hklm.open_subkey(r"SOFTWARE\WOW6432Node\Valve\Steam") {
+        if let Ok(path) = key.get_value::<String, _>("InstallPath") {
+            let p = PathBuf::from(path.replace('/', "\\"));
+            if p.exists() { return Some(p); }
+        }
+    }
+
+    None
 }
 
 // Get the Steam library folders by reading the libraryfolders.vdf file

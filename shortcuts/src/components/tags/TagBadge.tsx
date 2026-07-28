@@ -3,12 +3,10 @@
  * It also provides a context menu for editing and deleting the tag.
  */
 
-import { useState } from "react";
 import { Tag } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent } from "@/components/ui/context-menu";
 import TagMenu from "./TagMenu";
-import { GripVertical } from "lucide-react";
 
 interface Props {
   tag: Tag;
@@ -19,8 +17,6 @@ interface Props {
 }
 
 export default function TagBadge({ tag, selected, onClick, onUpdate, onDelete }: Props) {
-    const [hovered, setHovered] = useState(false);
-
     return (
         <ContextMenu>
             <ContextMenuTrigger>
@@ -31,10 +27,7 @@ export default function TagBadge({ tag, selected, onClick, onUpdate, onDelete }:
                     }}
                     className="flex h-full cursor-pointer items-center border transition-all text-primary font-semibold"
                     onClick={onClick}
-                    onMouseEnter={() => setHovered(true)}
-                    onMouseLeave={() => setHovered(false)}
                 >
-                    {hovered && <GripVertical />}
                     {tag.name}
                 </Badge>
             </ContextMenuTrigger>

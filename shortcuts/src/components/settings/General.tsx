@@ -89,7 +89,7 @@ export default function GeneralSettings() {
                         if (value) updateSettings({ position: value });
                     }}
                 >
-                    <SelectTrigger className="w-full max-w-1/2">
+                    <SelectTrigger className="w-full max-w-2/3">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -114,7 +114,7 @@ export default function GeneralSettings() {
                         if (value) updateSettings({ theme: value });
                     }}
                 >
-                    <SelectTrigger className="w-full max-w-1/2">
+                    <SelectTrigger className="w-full max-w-2/3">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -139,7 +139,7 @@ export default function GeneralSettings() {
                         if (value) updateSettings({ language: value });
                     }}
                 >
-                    <SelectTrigger className="w-full max-w-1/2">
+                    <SelectTrigger className="w-full max-w-2/3">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -155,7 +155,7 @@ export default function GeneralSettings() {
             </div>
             
             {/* Update Interval */}
-            <div className="flex flex-col gap-2 max-w-1/2">
+            <div className="flex flex-col gap-2 max-w-2/3">
                 <div className="flex items-center justify-between">
                     <Label htmlFor="updateInterval">{t("settings.updateInterval")}</Label>
                     <Switch

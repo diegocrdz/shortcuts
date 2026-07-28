@@ -118,11 +118,11 @@
                 "description": "Information about the application.",
                 "version": {
                     "title": "Version",
-                    "description": "v0.3.1-alpha"
+                    "description": "v0.3.2-alpha"
                 },
                 "lastUpdate": {
                     "title": "Last update",
-                    "description": "2026-07-26"
+                    "description": "2026-07-28"
                 },
                 "license": {
                     "title": "License",

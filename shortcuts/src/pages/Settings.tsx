@@ -28,7 +28,7 @@ export default function Settings() {
     return (
         <div className="grid grid-cols-[auto_1fr] h-full">
             {/* Sidebar */}
-            <div className="flex flex-col gap-8 p-8">
+            <div className="flex bg-background/30 flex-col gap-8 p-8">
                 {/* Title */}
                 <div className="flex items-center gap-4">
                     <Button onClick={() => navigate("/")} variant="outline" size="icon">
@@ -60,7 +60,7 @@ export default function Settings() {
             </div>
 
             {/* Content */}
-            <div className="flex bg-background/30 gap-8 overflow-auto">
+            <div className="flex gap-8 overflow-auto">
                 {activeTab === "general" ? (
                     <General />
                 ) : activeTab === "excluded" ? (

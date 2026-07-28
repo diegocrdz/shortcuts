@@ -39,7 +39,7 @@ export default function TagMenu({
                 autoFocus
                 value={name}
                 placeholder={t("tags.namePlaceholder")}
-                maxLength={20}
+                maxLength={15}
                 onChange={(e) => onNameChange(e.target.value)}
                 onKeyDown={(e) => e.stopPropagation()}
             />
