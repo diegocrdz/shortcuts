@@ -48,6 +48,8 @@
             "launching": "Opening...",
             "launched": "Opened",
             "launchError": "Error opening",
+            "select": "Select",
+            "unselect": "Unselect",
             "selected": "selected",
             "restore": "Restore",
             "sync": "Sync shortcuts",
@@ -56,7 +58,10 @@
             "shortcutCreated": "Shortcut created",
             "shortcutUpdated": "Shortcut updated",
             "shortcutDeleted": "Shortcut deleted",
-            "categoryChanged": "Category changed"
+            "categoryChanged": "Category changed",
+            "addTitle": "Add a shortcut",
+            "addAction": "Add",
+            "addDescription": "Add a shortcut from the programs installed on your computer."
         },
         "columns": {
             "name": "Name",
@@ -100,7 +105,7 @@
         }
     },
     "searchBar": {
-        "placeholder": "Search shortcuts..."
+        "placeholder": "Search..."
     },
     "settings": {
         "title": "Settings",
@@ -118,11 +123,11 @@
                 "description": "Information about the application.",
                 "version": {
                     "title": "Version",
-                    "description": "v0.3.2-alpha"
+                    "description": "v0.4.0-alpha"
                 },
                 "lastUpdate": {
                     "title": "Last update",
-                    "description": "2026-07-28"
+                    "description": "2026-07-29"
                 },
                 "license": {
                     "title": "License",

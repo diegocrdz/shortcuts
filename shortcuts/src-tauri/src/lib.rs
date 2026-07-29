@@ -14,6 +14,7 @@ mod riot;
 mod scanner;
 mod settings;
 mod utilities;
+mod installed_programs;
 use tauri::{Manager, Emitter};
 use std::sync::{Arc, atomic::{AtomicBool, AtomicU64, Ordering}};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState, Modifiers, Code};
@@ -75,6 +76,7 @@ pub fn run() {
             excluded::delete_excluded,
             excluded::restore_excluded,
             excluded::clear_excluded,
+            installed_programs::list_installed_programs,
         ])
         // Setup the window
         .setup(|app| {

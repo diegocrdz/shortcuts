@@ -200,7 +200,7 @@ export default function GeneralSettings() {
                 <AlertDialog open={resetOpen} onOpenChange={setResetOpen}>
                     <AlertDialogTrigger
                         render={
-                            <Button variant="destructive" className="w-full max-w-1/2">
+                            <Button variant="destructive" className="w-full max-w-2/3">
                             <TrashIcon />
                             {t("settings.deleteData")}
                             </Button>

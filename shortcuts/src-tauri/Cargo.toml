@@ -34,3 +34,4 @@ tauri-plugin-global-shortcut = "2.3.2"
 chrono = { version = "0.4.45", features = ["serde"] }
 winreg = "0.56.0"
 serde_yaml = "0.9"
+lnk = "0.6"

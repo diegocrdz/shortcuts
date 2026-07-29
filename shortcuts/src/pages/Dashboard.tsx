@@ -23,16 +23,18 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { AddShortcut } from "@/components/shortcuts/AddShortcut";
+import { ProgramsDialog } from "@/components/shortcuts/ProgramsDialog";
 import SelectionBadge from "@/components/utils/SelectionBadge";
 
 // API
 import { getTags, createTag, updateTag, deleteTag, reorderTags } from "@/lib/api/tags";
-import { getShortcuts, createShortcut, updateShortcut, deleteShortcut, launchShortcut } from "@/lib/api/shortcuts";
+import { getShortcuts, updateShortcut, deleteShortcut, launchShortcut } from "@/lib/api/shortcuts";
 import { getCategories, createCategory, updateCategory, deleteCategory, reorderCategories } from "@/lib/api/categories";
 import { syncShortcuts } from "@/lib/api/scanner";
 
 // Icons
-import { RotateCcw, Plus, Settings, LayoutGrid, Star, ChevronDown } from "lucide-react";
+import { RotateCcw, Settings, LayoutGrid, Star, ChevronDown } from "lucide-react";
 
 // DnD Kit
 import {
@@ -76,6 +78,7 @@ export default function Dashboard() {
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState<{ name: string; progress: number } | null>(null);
     const [footerMsg, setFooterMsg] = useState<string | null>(null);
+    const [programsDialogOpen, setProgramsDialogOpen] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
 
@@ -115,7 +118,7 @@ export default function Dashboard() {
     // Load initial data on mount
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [programsDialogOpen]);
     
     // Tag functions
 
@@ -182,10 +185,8 @@ export default function Dashboard() {
 
     // Shortcut functions
 
-    async function handleCreateShortcut() {
-        const updatedShortcuts = await createShortcut();
-        if (updatedShortcuts) setShortcuts(updatedShortcuts);
-        showFooterMessage(t("shortcuts.actions.shortcutCreated"));
+    function toggleProgramsDialog() {
+        setProgramsDialogOpen((prev) => !prev);
     }
 
     async function handleUpdateShortcut(shortcut: Shortcut) {
@@ -292,9 +293,10 @@ export default function Dashboard() {
             <div className="flex flex-col gap-8 pt-8 px-8">
                 <div className="flex justify-between items-center gap-4">
                     <SearchBar ref={searchInputRef} query={searchQuery} onQueryChange={setSearchQuery} />
-                    <Button onClick={handleCreateShortcut} variant="outline" size="icon">
-                        <Plus />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <AddShortcut onClick={toggleProgramsDialog} />
+                        <ProgramsDialog t={t} isOpen={programsDialogOpen} onClose={() => setProgramsDialogOpen(false)} />
+                    </div>
                 </div>
                 
                 <div className="space-y-4" >
@@ -367,7 +369,7 @@ export default function Dashboard() {
             
             {/* Shortcut Grid */}
             <div className="relative flex-1 overflow-y-auto">
-                <div className="flex flex-col gap-6 px-8 pb-8">
+                <div className="flex flex-col gap-2 px-8 pb-8">
                     {groupByCategory(visibleShortcuts, categories).map(([categoryId, shortcuts]) => {
                         const category = categories.find((c) => c.id === categoryId);
                         const title = category ? t(`categories.defaultCategories.${category.id}`, category.name) : t("categories.defaultCategories.uncategorized");
@@ -390,6 +392,7 @@ export default function Dashboard() {
                 {selectedShortcuts.size > 0 && (
                     <SelectionBadge
                         t={t}
+                        bottom={20}
                         selectedCount={selectedShortcuts.size}
                         categories={categories}
                         onClearSelection={() => setSelectedShortcuts(new Set())}

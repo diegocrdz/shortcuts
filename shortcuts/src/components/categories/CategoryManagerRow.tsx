@@ -43,7 +43,7 @@ export default function CategoryManagerRow({
             style={style}
             {...attributes}
             {...listeners}
-            className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-muted/50"
+            className="flex items-center gap-3 rounded-md p-2 hover:bg-muted/50"
         >
             <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground cursor-grab active:cursor-grabbing" />
 

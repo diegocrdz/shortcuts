@@ -15,12 +15,14 @@ type SearchBarProps = {
     ref?: React.Ref<HTMLInputElement>;
     query: string;
     onQueryChange: (query: string) => void;
+    showKbd?: boolean;
 };
 
 export default function SearchBar({
     ref,
     query,
     onQueryChange,
+    showKbd = true,
 }: SearchBarProps) {
     const { t } = useTranslation();
 
@@ -36,11 +38,13 @@ export default function SearchBar({
                 <InputGroupAddon>
                     <Search />
                 </InputGroupAddon>
-                <InputGroupAddon align="inline-end">
-                    <Kbd>Ctrl</Kbd>
-                    <Kbd>Alt</Kbd>
-                    <Kbd>S</Kbd>
-                </InputGroupAddon>
+                {showKbd && (
+                    <InputGroupAddon align="inline-end">
+                        <Kbd>Ctrl</Kbd>
+                        <Kbd>Alt</Kbd>
+                        <Kbd>S</Kbd>
+                    </InputGroupAddon>
+                )}
             </InputGroup>
         </div>
     );

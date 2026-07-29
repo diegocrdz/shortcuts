@@ -26,7 +26,7 @@ export default function Settings() {
     ];
     
     return (
-        <div className="grid grid-cols-[auto_1fr] h-full">
+        <div className="grid grid-cols-[250px_1fr] h-full">
             {/* Sidebar */}
             <div className="flex bg-background/30 flex-col gap-8 p-8">
                 {/* Title */}

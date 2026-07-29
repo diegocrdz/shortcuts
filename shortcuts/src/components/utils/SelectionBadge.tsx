@@ -18,22 +18,26 @@ import {
 type SelectionBadgeProps = {
     t: TFunction;
     selectedCount: number;
-    categories: Category[];
+    categories?: Category[];
+    bottom?: number;
     onClearSelection?: () => void;
     onCategoryChange?: (categoryId: string) => void;
+    onAddShortcut?: () => void;
     onDelete?: () => void;
 };
 
 export default function SelectionBadge({
     t,
     selectedCount,
-    categories,
+    categories = [],
+    bottom = 0,
     onClearSelection,
     onCategoryChange,
+    onAddShortcut,
     onDelete,
 }: SelectionBadgeProps) {
     return (
-        <div className="fixed bottom-20 right-8 z-50 flex items-center gap-2 rounded-md bg-primary p-1">
+        <div className={`fixed bottom-${bottom} right-8 z-50 flex items-center gap-2 rounded-md bg-primary p-1`}>
             {/* Close button */}
             <Button
                 size="icon"
@@ -47,8 +51,19 @@ export default function SelectionBadge({
                 {selectedCount} {t("shortcuts.actions.selected")}
             </span>
 
+            {/* Add shortcut button */}
+            {onAddShortcut && (
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={onAddShortcut}
+                >
+                    {t("shortcuts.actions.addAction")}
+                </Button>
+            )}
+
             {/* Category button */}
-            {onClearSelection && (
+            {onCategoryChange && (
                 <DropdownMenu>
                     <DropdownMenuTrigger>
                         <Button

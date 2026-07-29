@@ -38,3 +38,11 @@ export interface Settings {
   last_sync: string | null; // Last time the shortcuts were synced with the game launchers
   sync_enabled: boolean; // Whether automatic sync is enabled
 }
+
+export interface Program {
+  id: string;
+  name: string;
+  target: string;
+  icon_path?: string | null;
+  args?: string | null;
+}

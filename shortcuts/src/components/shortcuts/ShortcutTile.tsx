@@ -144,6 +144,10 @@ export default function ShortcutTile({
                 ) : (null)}
 
                 <ContextMenuGroup>
+                    <ContextMenuItem onClick={() => onSelect(shortcut.id)}>
+                        <Checkbox checked={selected} onCheckedChange={() => onSelect(shortcut.id)} />
+                        {selected ? t("shortcuts.actions.unselect") : t("shortcuts.actions.select")}
+                    </ContextMenuItem>
                     <ContextMenuItem onClick={() => onLaunch(shortcut)}>
                         <ExternalLink />
                         {t("shortcuts.open")}

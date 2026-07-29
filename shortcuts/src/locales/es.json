@@ -48,6 +48,8 @@
             "launching": "Abriendo...",
             "launched": "Abierto",
             "launchError": "Error al abrir",
+            "select": "Seleccionar",
+            "unselect": "Deseleccionar",
             "selected": "seleccionado(s)",
             "restore": "Restaurar",
             "sync": "Sincronizar atajos",
@@ -56,7 +58,10 @@
             "shortcutCreated": "Atajo creado",
             "shortcutUpdated": "Atajo actualizado",
             "shortcutDeleted": "Atajo eliminado",
-            "categoryChanged": "Categoría cambiada"
+            "categoryChanged": "Categoría cambiada",
+            "addTitle": "Agregar atajo",
+            "addAction": "Agregar",
+            "addDescription": "Agrega un atajo desde los programas instalados en tu computadora."
         },
         "columns": {
             "name": "Nombre",
@@ -100,7 +105,7 @@
         }
     },
     "searchBar": {
-        "placeholder": "Buscar atajos..."
+        "placeholder": "Buscar..."
     },
     "settings": {
         "title": "Configuración",
@@ -118,11 +123,11 @@
                 "description": "Información sobre la aplicación.",
                 "version": {
                     "title": "Versión",
-                    "description": "v0.3.2-alpha"
+                    "description": "v0.4.0-alpha"
                 },
                 "lastUpdate": {
                     "title": "Última actualización",
-                    "description": "2026-07-28"
+                    "description": "2026-07-29"
                 },
                 "license": {
                     "title": "Licencia",

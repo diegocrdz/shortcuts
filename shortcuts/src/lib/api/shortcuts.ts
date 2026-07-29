@@ -4,7 +4,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Shortcut } from "@/types";
+import { Shortcut, Program } from "@/types";
 
 /**
  * Sets the auto-minimize paused state in the backend.
@@ -21,7 +21,7 @@ export function getShortcuts() {
     return invoke<Shortcut[]>("get_shortcuts");
 }
 
-export async function createShortcut() {
+export async function createManualShortcut() {
     await setAutoMinimizePaused(true);
 
     try {
@@ -56,6 +56,24 @@ export async function createShortcut() {
     } finally {
         await setAutoMinimizePaused(false);
     }
+}
+
+// Create a shortcut from an installed program
+export async function createShortcut(program: Program) {
+    const newShortcut: Shortcut = {
+        id: crypto.randomUUID(),
+        name: program.name,
+        target: program.target,
+        args: null,
+        source: "manual",
+        is_favorite: false,
+        tags: [],
+        icon_path: program.icon_path ?? null,
+        category: "",
+    };
+
+    const updated = await invoke<Shortcut[]>("create_shortcut", { shortcut: newShortcut });
+    return updated;
 }
 
 export async function updateShortcut(shortcut: Shortcut) {
