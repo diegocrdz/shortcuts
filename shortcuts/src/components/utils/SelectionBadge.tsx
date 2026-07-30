@@ -38,10 +38,8 @@ export default function SelectionBadge({
 }: SelectionBadgeProps) {
     return (
         <div
-            className={`
-                fixed right-8 z-50 flex items-center gap-2 rounded-md bg-primary p-1
-                ${bottom ? `bottom-${bottom}` : "bottom-0"}
-            `}
+            className="fixed right-8 z-50 flex items-center gap-2 rounded-md bg-primary p-1"
+            style={{ bottom: `${bottom}rem` }}
         >
             {/* Close button */}
             <Button

@@ -103,7 +103,7 @@ export function ProgramsDialog({
                 {selectedPrograms.length > 0 && (
                     <SelectionBadge
                         t={t}
-                        bottom={4}
+                        bottom={1}
                         selectedCount={selectedPrograms.length}
                         onAddShortcut={createShortcuts}
                         onClearSelection={() => setSelectedPrograms([])}

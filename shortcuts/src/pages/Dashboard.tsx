@@ -392,7 +392,7 @@ export default function Dashboard() {
                 {selectedShortcuts.size > 0 && (
                     <SelectionBadge
                         t={t}
-                        bottom={20}
+                        bottom={5}
                         selectedCount={selectedShortcuts.size}
                         categories={categories}
                         onClearSelection={() => setSelectedShortcuts(new Set())}
