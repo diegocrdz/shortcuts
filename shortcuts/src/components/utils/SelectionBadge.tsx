@@ -37,7 +37,12 @@ export default function SelectionBadge({
     onDelete,
 }: SelectionBadgeProps) {
     return (
-        <div className={`fixed bottom-${bottom} right-8 z-50 flex items-center gap-2 rounded-md bg-primary p-1`}>
+        <div
+            className={`
+                fixed right-8 z-50 flex items-center gap-2 rounded-md bg-primary p-1
+                ${bottom ? `bottom-${bottom}` : "bottom-0"}
+            `}
+        >
             {/* Close button */}
             <Button
                 size="icon"
