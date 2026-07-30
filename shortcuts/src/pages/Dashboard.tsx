@@ -416,7 +416,14 @@ export default function Dashboard() {
             
             {/* Footer */}
             <div className="flex justify-between items-center gap-4 bg-background/30 px-8 py-4">
-                <img src="icon.png" alt="Logo" className="h-7 w-7" />
+                <a
+                    href="https://github.com/diegocrdz/shortcuts"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border-2 border-transparent rounded-full hover:border-white transition-border duration-200"
+                >
+                    <img src="icon.png" alt="Logo" className="h-7 w-7" />
+                </a>
                 <div className="text-sm text-muted-foreground">
                     {footerMsg}
                 </div>

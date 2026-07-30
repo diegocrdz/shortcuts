@@ -8,7 +8,7 @@ import { Program } from "@/types";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getInstalledPrograms } from "@/lib/api/installedPrograms";
 import { Button } from "@/components/ui/button";
-import { Folder } from "lucide-react";
+import { Folder, LoaderCircle } from "lucide-react";
 import { ProgramRow } from "@/components/shortcuts/ProgramRow";
 import { createShortcut, createManualShortcut } from "@/lib/api/shortcuts";
 import SearchBar from "@/components/SearchBar";
@@ -26,6 +26,7 @@ export function ProgramsDialog({
     t,
 }: ProgramsDialogProps) {
     const [programs, setPrograms] = useState<Program[]>([]);
+    const [loading, setLoading] = useState(false);
     const [selectedPrograms, setSelectedPrograms] = useState<Program[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -34,11 +35,16 @@ export function ProgramsDialog({
         program.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
     );
 
+    async function fetchPrograms() {
+        setLoading(true);
+        const installedPrograms = await getInstalledPrograms();
+        setPrograms(installedPrograms);
+        setLoading(false);
+    }
+
     useEffect(() => {
         if (isOpen) {
-            getInstalledPrograms().then((programs) => {
-                setPrograms(programs);
-            });
+            fetchPrograms();
         }
     }, [isOpen]);
 
@@ -86,6 +92,12 @@ export function ProgramsDialog({
                         <Folder />
                     </Button>
                 </div>
+
+                {loading && (
+                    <div className="flex items-center justify-center">
+                        <LoaderCircle className="w-4 h-4 animate-spin" />
+                    </div>
+                )}
 
                 {/* Programs list */}
                 <div className="flex-1 min-h-0 overflow-y-auto">

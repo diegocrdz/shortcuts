@@ -4,11 +4,13 @@
 
 import { useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { AnimatePresence } from "motion/react";
+import { PageTransition } from "@/components/utils/PageTransition";
 
 import Onboarding from "@/pages/Onboarding";
 import Dashboard from "@/pages/Dashboard";
@@ -16,6 +18,7 @@ import Settings from "@/pages/Settings";
 
 function AppRoutes() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { settings, updateSettings: updateContextSettings } = useSettings();
 
     // Check if onboarding should be shown
@@ -56,12 +59,14 @@ function AppRoutes() {
     }, []);
 
     return (
-        <main className="bg-card/40 h-full">
-            <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/onboarding" element={<Onboarding onFinish={onFinishOnboarding} />} />
-            </Routes>
+        <main className="bg-card/40 h-full overflow-hidden">
+            <AnimatePresence mode="wait" initial={false}>
+                <Routes location={location} key={location.pathname}>
+                    <Route path="/" element={<PageTransition><Dashboard /></PageTransition>} />
+                    <Route path="/settings" element={<PageTransition position="left"><Settings /></PageTransition>} />
+                    <Route path="/onboarding" element={<PageTransition><Onboarding onFinish={onFinishOnboarding} /></PageTransition>} />
+                </Routes>
+            </AnimatePresence>
         </main>
     );
 }
