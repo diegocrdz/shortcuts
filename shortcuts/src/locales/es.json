@@ -123,11 +123,11 @@
                 "description": "Información sobre la aplicación.",
                 "version": {
                     "title": "Versión",
-                    "description": "v0.4.0-alpha"
+                    "description": "v0.5.1-alpha"
                 },
                 "lastUpdate": {
                     "title": "Última actualización",
-                    "description": "2026-07-29"
+                    "description": "2026-08-01"
                 },
                 "license": {
                     "title": "Licencia",
