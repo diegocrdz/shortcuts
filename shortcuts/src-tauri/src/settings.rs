@@ -1,26 +1,27 @@
-/**
- * Settings
- */
-
-use tauri::AppHandle;
-use crate::shortcuts::{Shortcut, save};
-use crate::tags::{Tag, save_tags};
-use crate::categories::{Category, save_categories};
+use crate::categories::{save_categories, Category};
 use crate::excluded::clear_excluded;
+use crate::shortcuts::{save, Shortcut};
+use crate::tags::{save_tags, Tag};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
+/**
+ * Settings
+ */
+use tauri::AppHandle;
 use tauri::Manager;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Settings {
-    pub theme: String, // "light" | "dark" | "system"
-    pub language: String, // "en" | "es"
-    pub update_interval: u32, // hours between automatic sync with game launchers
-    pub position: String, // "bottom-center" | "bottom-left" | "center"
-    pub show_onboarding: bool, // Show onboarding screen on first launch
+    pub auto_start: bool,          // Whether the app should start automatically on system startup
+    pub start_behavior: String,    // "normal" | "minimized" | "hidden"
+    pub theme: String,             // "light" | "dark" | "system"
+    pub language: String,          // "en" | "es"
+    pub update_interval: u32,      // hours between automatic sync with game launchers
+    pub position: String,          // "bottom-center" | "bottom-left" | "center"
+    pub show_onboarding: bool,     // Show onboarding screen on first launch
     pub last_sync: Option<String>, // Last time the shortcuts were synced with the game launchers (ISO 8601 - e.g., "2023-01-01T12:00:00Z")
-    pub sync_enabled: bool, // Whether automatic sync is enabled
+    pub sync_enabled: bool,        // Whether automatic sync is enabled
 }
 
 // Detect the system language
@@ -40,6 +41,8 @@ fn detect_system_language() -> String {
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            auto_start: false,
+            start_behavior: "normal".into(),
             theme: "system".into(),
             language: detect_system_language(),
             update_interval: 6,
@@ -53,7 +56,10 @@ impl Default for Settings {
 
 // Get the path to the settings configuration file
 fn settings_path(app: &AppHandle) -> PathBuf {
-    let dir = app.path().app_data_dir().expect("could not determine app data directory");
+    let dir = app
+        .path()
+        .app_data_dir()
+        .expect("could not determine app data directory");
     fs::create_dir_all(&dir).ok();
     dir.join("settings.json")
 }
@@ -123,4 +129,59 @@ pub fn reset_settings(app: AppHandle) -> Result<Settings, String> {
     // Reset settings to default
     save_settings(&app, &Settings::default())?;
     Ok(Settings::default())
+}
+
+// Calculates and applies the window position based on the configured setting.
+// Called on startup, and whenever the user changes the position setting.
+#[tauri::command]
+pub fn apply_window_position(app: AppHandle, position: String) -> Result<(), String> {
+    let window = app.get_webview_window("main").ok_or("Window not found")?;
+
+    let monitor = window
+        .current_monitor()
+        .map_err(|e| e.to_string())?
+        .ok_or("No monitor")?;
+
+    let scale = monitor.scale_factor();
+    let screen_w = monitor.size().width as f64 / scale;
+    let screen_h = monitor.size().height as f64 / scale;
+
+    let win_size = window.outer_size().map_err(|e| e.to_string())?;
+    let win_w = win_size.width as f64 / scale;
+    let win_h = win_size.height as f64 / scale;
+
+    let taskbar = 48.0;
+    let margin = 12.0;
+
+    let (x, y) = match position.as_str() {
+        "bottom-left" => (margin, screen_h - win_h - margin - taskbar),
+        "center" => ((screen_w - win_w) / 2.0, (screen_h - win_h) / 2.0),
+        _ => ((screen_w - win_w) / 2.0, screen_h - win_h - margin - taskbar),
+    };
+
+    window
+        .set_position(tauri::LogicalPosition::new(x, y))
+        .map_err(|e| e.to_string())
+}
+
+// Applies the startup visibility behavior (normal / minimized / hidden).
+// Called only on app startup.
+pub fn apply_start_behavior(app: &AppHandle, start_behavior: &str) -> Result<(), String> {
+    let window = app.get_webview_window("main").ok_or("Window not found")?;
+
+    match start_behavior {
+        "hidden" => {
+            window.hide().map_err(|e| e.to_string())?;
+        }
+        "minimized" => {
+            window.minimize().map_err(|e| e.to_string())?;
+        }
+        _ => {
+            window.unminimize().ok();
+            window.show().ok();
+            window.set_focus().ok();
+        }
+    }
+
+    Ok(())
 }

@@ -2,12 +2,12 @@
  * Logic for managing tags
  */
 
+use crate::shortcuts::load;
+use crate::shortcuts::save;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
-use crate::shortcuts::save;
-use crate::shortcuts::load;
 
 // Tag struct
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -19,7 +19,10 @@ pub struct Tag {
 
 // Get the path to the tags configuration file
 fn tags_path(app: &AppHandle) -> PathBuf {
-    let dir = app.path().app_data_dir().expect("no se pudo resolver app_data_dir");
+    let dir = app
+        .path()
+        .app_data_dir()
+        .expect("no se pudo resolver app_data_dir");
     fs::create_dir_all(&dir).ok();
     dir.join("tags.json")
 }

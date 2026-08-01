@@ -4,51 +4,173 @@
  * Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
  */
 
-mod shortcuts;
-mod excluded;
-mod tags;
 mod categories;
-mod steam;
 mod epic_games;
+mod excluded;
+mod installed_programs;
 mod riot;
 mod scanner;
 mod settings;
+mod shortcuts;
+mod steam;
+mod tags;
 mod utilities;
-mod installed_programs;
-use tauri::{Manager, Emitter};
-use std::sync::{Arc, atomic::{AtomicBool, AtomicU64, Ordering}};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState, Modifiers, Code};
+
+use std::sync::{
+    atomic::{AtomicBool, AtomicU64, Ordering},
+    Arc,
+};
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::TrayIconBuilder,
+    AppHandle, Emitter, Manager, WebviewWindow,
+};
+use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+
+/// Shows the main window, un-minimizes it if needed, and focuses it.
+/// Single source of truth for "bring window to front" — used by the
+/// global shortcut, the tray menu, and the tray icon click.
+fn show_and_focus_window(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    }
+}
+
+/// Toggles the main window: minimizes if visible/focused, otherwise brings it to front.
+fn toggle_window(app: &AppHandle) {
+    let Some(window) = app.get_webview_window("main") else {
+        return;
+    };
+
+    let is_visible = window.is_visible().unwrap_or(false);
+    let is_minimized = window.is_minimized().unwrap_or(false);
+    let is_focused = window.is_focused().unwrap_or(false);
+
+    if is_visible && !is_minimized && is_focused {
+        let _ = window.minimize();
+    } else {
+        show_and_focus_window(app);
+    }
+}
+
+/// Builds and attaches the system tray icon, menu, and its event handlers.
+fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
+    let open_item = MenuItem::with_id(app, "open", "Abrir", true, None::<&str>)?;
+    let sync_item = MenuItem::with_id(app, "sync", "Sincronizar ahora", true, None::<&str>)?;
+    let quit_item = MenuItem::with_id(app, "quit", "Salir", true, None::<&str>)?;
+    let tray_menu = Menu::with_items(app, &[&open_item, &sync_item, &quit_item])?;
+
+    TrayIconBuilder::new()
+        .icon(app.default_window_icon().unwrap().clone())
+        .menu(&tray_menu)
+        .show_menu_on_left_click(false)
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            "open" => show_and_focus_window(app),
+            "sync" => {
+                if let Ok(updated) = scanner::sync_shortcuts(app.clone()) {
+                    let _ = app.emit("shortcuts-synced", updated);
+                }
+            }
+            "quit" => app.exit(0),
+            _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            if let tauri::tray::TrayIconEvent::Click {
+                button: tauri::tray::MouseButton::Left,
+                button_state: tauri::tray::MouseButtonState::Up,
+                ..
+            } = event
+            {
+                let app = tray.app_handle();
+                let is_visible = app
+                    .get_webview_window("main")
+                    .and_then(|w| w.is_visible().ok())
+                    .unwrap_or(false);
+
+                if is_visible {
+                    if let Some(w) = app.get_webview_window("main") {
+                        let _ = w.hide();
+                    }
+                } else {
+                    show_and_focus_window(app);
+                }
+            }
+        })
+        .build(app)?;
+
+    Ok(())
+}
+
+/// Registers the auto-minimize-on-blur behavior: when the window loses focus,
+/// wait briefly (in case focus bounces back) then minimize it — unless paused.
+fn setup_auto_minimize(app_handle: AppHandle, window: &WebviewWindow, paused: Arc<AtomicBool>) {
+    let focus_epoch = Arc::new(AtomicU64::new(0));
+
+    window.on_window_event(move |event| match event {
+        tauri::WindowEvent::Focused(true) => {
+            focus_epoch.fetch_add(1, Ordering::SeqCst);
+        }
+        tauri::WindowEvent::Focused(false) => {
+            if paused.load(Ordering::SeqCst) {
+                return;
+            }
+
+            let my_epoch = focus_epoch.fetch_add(1, Ordering::SeqCst) + 1;
+            let app_handle = app_handle.clone();
+            let focus_epoch = focus_epoch.clone();
+
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+
+                if focus_epoch.load(Ordering::SeqCst) == my_epoch {
+                    let _ = app_handle.get_webview_window("main").map(|w| w.minimize());
+                }
+            });
+        }
+        _ => {}
+    });
+}
+
+/// Spawns the background loop that periodically syncs shortcuts,
+/// respecting `sync_enabled` and `update_interval` from settings.
+fn spawn_sync_loop(app_handle: AppHandle) {
+    tauri::async_runtime::spawn(async move {
+        loop {
+            let settings = settings::load_settings(&app_handle);
+
+            if settings.sync_enabled {
+                if let Ok(updated) = scanner::sync_shortcuts(app_handle.clone()) {
+                    let _ = app_handle.emit("shortcuts-synced", updated);
+                }
+            }
+
+            let hours = settings.update_interval.max(1);
+            tokio::time::sleep(std::time::Duration::from_secs(hours as u64 * 3600)).await;
+        }
+    });
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        // Global shortcut for toggling the window visibility
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, _shortcut, event| {
                     if event.state == ShortcutState::Pressed {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let is_visible = window.is_visible().unwrap_or(false);
-                            let is_minimized = window.is_minimized().unwrap_or(false);
-                            let is_focused = window.is_focused().unwrap_or(false);
-
-                            if is_visible && !is_minimized && is_focused {
-                                // Is visible, not minimized, and focused -> minimize it
-                                let _ = window.minimize();
-                            } else {
-                                // Either not visible, minimized, or not focused -> unminimize and focus it
-                                let _ = window.unminimize();
-                                let _ = window.show();
-                                let _ = window.set_focus();
-                            }
-                        }
+                        toggle_window(app);
                     }
                 })
-                .build()
+                .build(),
         )
-        // Commands for the frontend to call into Rust
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            Some(vec!["--minimized"]),
+        ))
         .invoke_handler(tauri::generate_handler![
             utilities::set_auto_minimize_paused,
             shortcuts::get_shortcuts,
@@ -72,80 +194,35 @@ pub fn run() {
             settings::get_settings,
             settings::update_settings,
             settings::reset_settings,
+            settings::apply_window_position,
             excluded::get_excluded,
             excluded::delete_excluded,
             excluded::restore_excluded,
             excluded::clear_excluded,
             installed_programs::list_installed_programs,
         ])
-        // Setup the window
         .setup(|app| {
-            // Get the main window
             let window = app.get_webview_window("main").unwrap();
+            let settings = settings::load_settings(app.handle());
+            let _ = settings::apply_window_position(app.handle().clone(), settings.position.clone());
+            let _ = settings::apply_start_behavior(app.handle(), &settings.start_behavior);
+
             let auto_minimize_paused = Arc::new(AtomicBool::new(false));
             app.manage(auto_minimize_paused.clone());
 
-            // Apply acrylic effect on Windows
             #[cfg(target_os = "windows")]
             {
                 use window_vibrancy::apply_acrylic;
                 let _ = apply_acrylic(&window, Some((18, 18, 18, 200)));
             }
 
-            // Start the background task to sync shortcuts periodically
-            let app_handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                loop {
-                    let settings = settings::load_settings(&app_handle);
+            spawn_sync_loop(app.handle().clone());
+            setup_auto_minimize(app.handle().clone(), &window, auto_minimize_paused);
 
-                    if settings.sync_enabled {
-                        if let Ok(updated) = scanner::sync_shortcuts(app_handle.clone()) {
-                            // Emit an event to the frontend to notify that shortcuts have been synced
-                            let _ = app_handle.emit("shortcuts-synced", updated);
-                        }
-                    }
-
-                    // Sleep for the configured update interval before syncing again
-                    let hours = settings.update_interval.max(1); // Ensure at least 1 hour
-                    tokio::time::sleep(std::time::Duration::from_secs(hours as u64 * 3600)).await;
-                }
-            });
-
-            // Minimize the window if the app is not focused
-            let app_handle = app.handle().clone();
-            let focus_epoch = Arc::new(AtomicU64::new(0));
-
-            window.on_window_event(move |event| {
-                match event {
-                    tauri::WindowEvent::Focused(true) => {
-                        // Cancel any pending minimize actions by incrementing the epoch
-                        focus_epoch.fetch_add(1, Ordering::SeqCst);
-                    }
-                    tauri::WindowEvent::Focused(false) => {
-                        if auto_minimize_paused.load(Ordering::SeqCst) {
-                            return;
-                        }
-
-                        let my_epoch = focus_epoch.fetch_add(1, Ordering::SeqCst) + 1;
-                        let app_handle = app_handle.clone();
-                        let focus_epoch = focus_epoch.clone();
-
-                        tauri::async_runtime::spawn(async move {
-                            tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-
-                            // Minimize the window only if the epoch hasn't changed, indicating that the app is still unfocused
-                            if focus_epoch.load(Ordering::SeqCst) == my_epoch {
-                                let _ = app_handle.get_webview_window("main").map(|w| w.minimize());
-                            }
-                        });
-                    }
-                    _ => {}
-                }
-            });
-
-            // Global shortcut to toggle the window visibility
             let shortcut = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyS);
             app.global_shortcut().register(shortcut)?;
+
+            setup_tray(app)?;
 
             Ok(())
         })

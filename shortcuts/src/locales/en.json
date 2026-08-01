@@ -157,6 +157,14 @@
             "bottomLeft": "Bottom - Left",
             "center": "Center"
         },
+        "autoStart": "Auto Start",
+        "autoStartDescription": "Automatically start Shortcuts when logging into Windows.",
+        "startBehavior": "Start Behavior",
+        "startBehaviorOptions": {
+            "normal": "Normal",
+            "minimized": "Minimized",
+            "hidden": "Hidden"
+        },
         "theme": "Theme",
         "themeOptions": {
             "light": "Light",

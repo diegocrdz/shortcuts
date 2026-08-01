@@ -1,12 +1,14 @@
-/* 
+/*
  * Scan and detect steam games on the system
  */
 
-use crate::shortcuts::{game_shortcut, launcher_shortcut, extract_icon_from_exe, icons_dir, Shortcut, SOURCE_STEAM};
-use std::fs;
-use std::path::PathBuf;
-use std::path::Path;
+use crate::shortcuts::{
+    extract_icon_from_exe, game_shortcut, icons_dir, launcher_shortcut, Shortcut, SOURCE_STEAM,
+};
 use std::collections::HashSet;
+use std::fs;
+use std::path::Path;
+use std::path::PathBuf;
 use tauri::AppHandle;
 use winreg::enums::*;
 use winreg::RegKey;
@@ -26,7 +28,9 @@ fn steam_install_path() -> Option<PathBuf> {
     if let Ok(key) = hkcu.open_subkey(r"Software\Valve\Steam") {
         if let Ok(path) = key.get_value::<String, _>("SteamPath") {
             let p = PathBuf::from(path.replace('/', "\\"));
-            if p.exists() { return Some(p); }
+            if p.exists() {
+                return Some(p);
+            }
         }
     }
 
@@ -35,7 +39,9 @@ fn steam_install_path() -> Option<PathBuf> {
     if let Ok(key) = hklm.open_subkey(r"SOFTWARE\WOW6432Node\Valve\Steam") {
         if let Ok(path) = key.get_value::<String, _>("InstallPath") {
             let p = PathBuf::from(path.replace('/', "\\"));
-            if p.exists() { return Some(p); }
+            if p.exists() {
+                return Some(p);
+            }
         }
     }
 
@@ -83,13 +89,20 @@ fn save_steam_game_icon(app: &AppHandle, steam_path: &Path, appid: &str) -> Opti
 // Scan for installed Steam games and return them as a list of shortcuts
 pub fn scan_steam(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcut> {
     let mut results = Vec::new();
-    let Some(steam_path) = steam_install_path() else { return results; };
+    let Some(steam_path) = steam_install_path() else {
+        return results;
+    };
 
     // Launcher
 
     let launcher = steam_path.join("Steam.exe");
     if launcher.exists() {
-        let mut shortcut = launcher_shortcut("steam", "Steam", launcher.to_string_lossy().to_string(), SOURCE_STEAM);
+        let mut shortcut = launcher_shortcut(
+            "steam",
+            "Steam",
+            launcher.to_string_lossy().to_string(),
+            SOURCE_STEAM,
+        );
         shortcut.icon_path = extract_icon_from_exe(app, &shortcut.target, &shortcut.id);
         results.push(shortcut);
     }
@@ -98,17 +111,29 @@ pub fn scan_steam(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortc
 
     for lib in steam_library_folders(&steam_path) {
         let steamapps = lib.join("steamapps");
-        let Ok(entries) = fs::read_dir(&steamapps) else { continue; };
+        let Ok(entries) = fs::read_dir(&steamapps) else {
+            continue;
+        };
 
         for entry in entries.flatten() {
             let path = entry.path();
-            if path.extension().and_then(|e| e.to_str()) != Some("acf") { continue; }
+            if path.extension().and_then(|e| e.to_str()) != Some("acf") {
+                continue;
+            }
 
-            let Ok(content) = fs::read_to_string(&path) else { continue; };
-            let (Some(name), Some(appid)) = (vdf_value(&content, "name"), vdf_value(&content, "appid")) else { continue; };
+            let Ok(content) = fs::read_to_string(&path) else {
+                continue;
+            };
+            let (Some(name), Some(appid)) =
+                (vdf_value(&content, "name"), vdf_value(&content, "appid"))
+            else {
+                continue;
+            };
 
             let id = format!("steam-{}", appid);
-            if excluded_ids.contains(&id) { continue; } // Skip excluded shortcuts
+            if excluded_ids.contains(&id) {
+                continue;
+            } // Skip excluded shortcuts
 
             let mut shortcut = game_shortcut(
                 id,

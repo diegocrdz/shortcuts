@@ -57,13 +57,20 @@ fn start_menu_dirs() -> Vec<PathBuf> {
 
 // Recursively collect every .lnk file under a directory
 fn collect_lnk_files(dir: &Path, results: &mut Vec<PathBuf>) {
-    let Ok(entries) = fs::read_dir(dir) else { return; };
+    let Ok(entries) = fs::read_dir(dir) else {
+        return;
+    };
 
     for entry in entries.flatten() {
         let path = entry.path();
         if path.is_dir() {
             collect_lnk_files(&path, results);
-        } else if path.extension().and_then(|e| e.to_str()).map(|e| e.eq_ignore_ascii_case("lnk")).unwrap_or(false) {
+        } else if path
+            .extension()
+            .and_then(|e| e.to_str())
+            .map(|e| e.eq_ignore_ascii_case("lnk"))
+            .unwrap_or(false)
+        {
             results.push(path);
         }
     }
@@ -119,10 +126,14 @@ pub fn list_installed_programs(app: AppHandle) -> Vec<InstalledProgram> {
     let mut results = Vec::new();
 
     for lnk_path in lnk_paths {
-        let Some((name, target, args)) = resolve_lnk(&lnk_path) else { continue; };
+        let Some((name, target, args)) = resolve_lnk(&lnk_path) else {
+            continue;
+        };
 
         let dedup_key = (name.to_lowercase(), target.to_lowercase());
-        if !seen.insert(dedup_key) { continue; }
+        if !seen.insert(dedup_key) {
+            continue;
+        }
 
         let id = stable_id(&lnk_path);
 

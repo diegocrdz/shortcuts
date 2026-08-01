@@ -18,3 +18,7 @@ export async function updateSettings(settings: Settings) {
 export async function resetSettings() {
     return invoke<Settings>("reset_settings");
 }
+
+export async function applyWindowPosition(position: string) {
+    return invoke("apply_window_position", { position });
+}

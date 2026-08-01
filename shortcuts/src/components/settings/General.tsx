@@ -4,11 +4,13 @@
 
 import SettingsPage from "@/components/settings/SettingsLayout";
 import { useState } from "react";
+import { enable, disable } from '@tauri-apps/plugin-autostart';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner"
 import { useSettings } from "@/contexts/SettingsContext";
+import { applyWindowPosition } from "@/lib/api/settings";
 import { useTranslation } from "react-i18next";
 import { formatDate } from "@/components/utils/FormatDate";
 import {
@@ -42,6 +44,12 @@ export default function GeneralSettings() {
     
     // Constants
 
+    const START_BEHAVIOR_OPTIONS = [
+        { value: "normal", label: t("settings.startBehaviorOptions.normal") },
+        { value: "minimized", label: t("settings.startBehaviorOptions.minimized") },
+        { value: "hidden", label: t("settings.startBehaviorOptions.hidden") },
+    ];
+
     const POSITION_OPTIONS = [
         { value: "bottom-center", label: t("settings.positionOptions.bottomCenter") },
         { value: "bottom-left", label: t("settings.positionOptions.bottomLeft") },
@@ -72,6 +80,21 @@ export default function GeneralSettings() {
         await resetSettings();
         toast.success(t("settings.dataDeleted"));
     }
+
+    // Toggle auto start
+    async function toggleAutoStart(enabled: boolean) {
+        try {
+            if (enabled) {
+                updateSettings({ auto_start: true });
+                await enable();
+            } else {
+                updateSettings({ auto_start: false });
+                await disable();
+            }
+        } catch (error) {
+            console.error("Error toggling auto start:", error);
+        }
+    }
     
     return (
         <SettingsPage
@@ -79,6 +102,45 @@ export default function GeneralSettings() {
             description={t("settings.tabs.general.description")}
         >
         <div className="flex flex-col gap-8">
+            {/* Auto Start */}
+            <div className="flex flex-col gap-2 max-w-2/3">
+                <div className="flex items-center justify-between">
+                    <Label htmlFor="autoStart">{t("settings.autoStart")}</Label>
+                    <Switch
+                        checked={settings.auto_start}
+                        onCheckedChange={(checked) => toggleAutoStart(checked)}
+                    />
+                </div>
+                <Label htmlFor="autoStart" className="text-xs text-muted-foreground">
+                    {t("settings.autoStartDescription")}
+                </Label>
+            </div>
+
+            {/* Start Behavior */}
+            <div className="flex flex-col gap-2">
+                <Label htmlFor="startBehavior">{t("settings.startBehavior")}</Label>
+                <Select
+                    items={START_BEHAVIOR_OPTIONS}
+                    value={settings.start_behavior}
+                    onValueChange={(value) => {
+                        if (value) updateSettings({ start_behavior: value });
+                    }}
+                >
+                    <SelectTrigger className="w-full max-w-2/3">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            {START_BEHAVIOR_OPTIONS.map((item) => (
+                                <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+            </div>
+
             {/* Position */}
             <div className="flex flex-col gap-2">
                 <Label htmlFor="position">{t("settings.position")}</Label>
@@ -86,7 +148,10 @@ export default function GeneralSettings() {
                     items={POSITION_OPTIONS}
                     value={settings.position}
                     onValueChange={(value) => {
-                        if (value) updateSettings({ position: value });
+                        if (value) {
+                            updateSettings({ position: value });
+                            applyWindowPosition(value);
+                        }
                     }}
                 >
                     <SelectTrigger className="w-full max-w-2/3">

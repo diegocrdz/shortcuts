@@ -30,7 +30,9 @@ export interface Category {
 }
 
 export interface Settings {
-  theme: Theme;
+  auto_start: boolean; // Whether the app should start automatically on system startup
+  start_behavior: string; // How the app should start on system startup
+  theme: Theme; // "light" | "dark" | "system"
   language: string; // "en" | "es"
   update_interval: number; // hours between automatic sync with game launchers
   position: string; // "bottom-center" | "bottom-left" | "center"

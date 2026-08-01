@@ -2,12 +2,12 @@
  * Logic for managing categories
  */
 
+use crate::shortcuts::load;
+use crate::shortcuts::save;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
-use crate::shortcuts::save;
-use crate::shortcuts::load;
 
 // Constant for uncategorized shortcuts
 pub const UNCATEGORIZED: &str = "";
@@ -23,7 +23,10 @@ pub struct Category {
 
 // Get the path to categories configuration file
 fn categories_path(app: &AppHandle) -> PathBuf {
-    let dir = app.path().app_data_dir().expect("could not determine app data directory");
+    let dir = app
+        .path()
+        .app_data_dir()
+        .expect("could not determine app data directory");
     fs::create_dir_all(&dir).ok();
     dir.join("categories.json")
 }
@@ -100,7 +103,10 @@ pub fn delete_category(app: AppHandle, id: String) -> Result<Vec<Category>, Stri
 
 // Reorder categories
 #[tauri::command]
-pub fn reorder_categories(app: AppHandle, categories: Vec<Category>) -> Result<Vec<Category>, String> {
+pub fn reorder_categories(
+    app: AppHandle,
+    categories: Vec<Category>,
+) -> Result<Vec<Category>, String> {
     save_categories(&app, &categories)?;
     Ok(categories)
 }

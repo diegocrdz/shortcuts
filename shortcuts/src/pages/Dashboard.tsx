@@ -6,7 +6,6 @@
 
 // React
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 // Tauri
@@ -16,56 +15,26 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Shortcut, Tag, Category } from "@/types";
 
 // Components
-import ShortcutGrid from "@/components/shortcuts/ShortcutGrid";
-import SearchBar from "@/components/SearchBar";
-import AddTag from "@/components/tags/AddTag";
-import { Button } from "@/components/ui/button";
+import { Header } from "@/components/dashboard/Header";
+import { ShortcutGroups } from "@/components/dashboard/ShortcutGroups";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { AddShortcut } from "@/components/shortcuts/AddShortcut";
-import { ProgramsDialog } from "@/components/shortcuts/ProgramsDialog";
-import SelectionBadge from "@/components/utils/SelectionBadge";
+import { Footer } from "@/components/dashboard/Footer";
 
 // API
 import { getTags, createTag, updateTag, deleteTag, reorderTags } from "@/lib/api/tags";
 import { getShortcuts, updateShortcut, deleteShortcut, launchShortcut } from "@/lib/api/shortcuts";
-import { getCategories, createCategory, updateCategory, deleteCategory, reorderCategories } from "@/lib/api/categories";
+import { getCategories, createCategory, updateCategory, deleteCategory } from "@/lib/api/categories";
 import { syncShortcuts } from "@/lib/api/scanner";
-
-// Icons
-import { RotateCcw, Settings, LayoutGrid, Star, ChevronDown } from "lucide-react";
 
 // DnD Kit
 import {
-    DndContext,
-    closestCenter,
-    PointerSensor,
-    useSensor,
-    useSensors,
     DragEndEvent,
 } from "@dnd-kit/core";
-import {
-    SortableContext,
-    horizontalListSortingStrategy,
-    arrayMove,
-} from "@dnd-kit/sortable";
-import SortableTagBadge from "@/components/tags/SortableTagBadge";
-import { CategoryIcon } from "@/components/categories/CategoryIcon";
-import CategoryManagerDialog from "@/components/categories/CategoryManagerDialog";
+import { arrayMove } from "@dnd-kit/sortable";
 
-// Group shortcuts by category
-function groupByCategory(list: Shortcut[], categories: Category[]) {
-    const groups: Record<string, Shortcut[]> = {};
-    for (const category of categories) groups[category.id] = [];
-    groups[""] = []; // For uncategorized shortcuts
-
-    for (const s of list) {
-        (groups[s.category] ??= []).push(s);
-    }
-
-    return Object.entries(groups).filter(([, items]) => items.length > 0);
-}
+// Constants
+const MAX_FULL_CATEGORIES = 4;
+const MAX_VISIBLE_CATEGORIES = 15;
 
 export default function Dashboard() {
     const { t } = useTranslation();
@@ -80,13 +49,7 @@ export default function Dashboard() {
     const [footerMsg, setFooterMsg] = useState<string | null>(null);
     const [programsDialogOpen, setProgramsDialogOpen] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
-    const navigate = useNavigate();
-
-    const [manageOpen, setManageOpen] = useState(false);
-    const MAX_FULL_CATEGORIES = 4;
-    const MAX_VISIBLE_CATEGORIES = 15;
     const visibleCategories = categories.slice(0, MAX_VISIBLE_CATEGORIES);
-    const isCompact = visibleCategories.length > MAX_FULL_CATEGORIES;
 
     const visibleShortcuts = shortcuts
         // Filter by active tab
@@ -185,10 +148,6 @@ export default function Dashboard() {
 
     // Shortcut functions
 
-    function toggleProgramsDialog() {
-        setProgramsDialogOpen((prev) => !prev);
-    }
-
     async function handleUpdateShortcut(shortcut: Shortcut) {
         const updatedShortcuts = await updateShortcut(shortcut);
         if (updatedShortcuts) setShortcuts(updatedShortcuts);
@@ -267,13 +226,6 @@ export default function Dashboard() {
         setTimeout(() => setFooterMsg(null), duration);
     }
 
-    // DnD Kit setup for sortable tags
-    const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: { distance: 8 },
-        })
-    );
-
     // Handle tag drag end event to reorder tags
     async function handleTagDragEnd(event: DragEndEvent) {
         const { active, over } = event;
@@ -290,122 +242,44 @@ export default function Dashboard() {
     return (
         <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="flex flex-col gap-8 pt-8 px-8">
-                <div className="flex justify-between items-center gap-4">
-                    <SearchBar ref={searchInputRef} query={searchQuery} onQueryChange={setSearchQuery} />
-                    <div className="flex items-center gap-2">
-                        <AddShortcut onClick={toggleProgramsDialog} />
-                        <ProgramsDialog t={t} isOpen={programsDialogOpen} onClose={() => setProgramsDialogOpen(false)} />
-                    </div>
-                </div>
-                
-                <div className="space-y-4" >
-                    {/* Categories - Tabs */}
-                    <div className="flex justify-between items-center gap-4">
-                        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                            <TabsList className="bg-primary/10 gap-2 w-full">
-                                {[
-                                    { id: "all", icon: <LayoutGrid className="h-4 w-4 shrink-0" />, label: t("categories.defaultCategories.all") },
-                                    { id: "favourites", icon: <Star className="h-4 w-4 shrink-0" />, label: t("categories.defaultCategories.favourites") },
-                                    ...visibleCategories.map((category) => ({
-                                        id: category.id,
-                                        icon: <CategoryIcon name={category.icon} />,
-                                        label: t(`categories.defaultCategories.${category.id}`, category.name),
-                                    })),
-                                ].map(({ id, icon, label }) => (
-                                    <Tooltip key={id}>
-                                        <TooltipTrigger render={<TabsTrigger value={id} className="flex-1" />}>
-                                            {icon}
-                                            {!isCompact && label}
-                                        </TooltipTrigger>
-                                        {isCompact && <TooltipContent>{label}</TooltipContent>}
-                                    </Tooltip>
-                                ))}
-                            </TabsList>
-                        </Tabs>
-                        <Button variant="outline" size="icon" onClick={() => setManageOpen(true)}>
-                            <ChevronDown />
-                        </Button>
-                    </div>
-
-                    <CategoryManagerDialog
-                        t={t}
-                        open={manageOpen}
-                        onOpenChange={setManageOpen}
-                        categories={categories}
-                        onSelect={(category) => {
-                            setActiveTab(category.id);
-                            setManageOpen(false);
-                        }}
-                        onReorder={async (newOrder) => {
-                            setCategories(newOrder);
-                            await reorderCategories(newOrder);
-                        }}
-                        onCreate={handleCreateCategory}
-                        onUpdate={handleUpdateCategory}
-                        onDelete={handleDeleteCategory}
-                    />
-                    
-                    {/* Tags */}
-                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTagDragEnd}>
-                        <SortableContext items={tags.map((t) => t.id)} strategy={horizontalListSortingStrategy}>
-                            <div className="flex items-center flex-wrap gap-2 overflow-hidden">
-                                {tags.map((tag) => (
-                                    <SortableTagBadge
-                                        key={tag.id}
-                                        tag={tag}
-                                        selected={selectedTagIds.has(tag.id)}
-                                        onClick={() => toggleTag(tag.id)}
-                                        onUpdate={handleUpdateTag}
-                                        onDelete={handleDeleteTag}
-                                    />
-                                ))}
-                                <AddTag onCreate={handleCreateTag} />
-                            </div>
-                        </SortableContext>
-                    </DndContext>
-                </div>
-            </div>
+            <Header
+                t={t}
+                categories={categories}
+                setCategories={setCategories}
+                tags={tags}
+                visibleCategories={visibleCategories}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                selectedTagIds={selectedTagIds}
+                toggleTag={toggleTag}
+                handleCreateTag={handleCreateTag}
+                handleUpdateTag={handleUpdateTag}
+                handleDeleteTag={handleDeleteTag}
+                handleTagDragEnd={handleTagDragEnd}
+                handleCreateCategory={handleCreateCategory}
+                handleUpdateCategory={handleUpdateCategory}
+                handleDeleteCategory={handleDeleteCategory}
+                MAX_FULL_CATEGORIES={MAX_FULL_CATEGORIES}
+                programsDialogOpen={programsDialogOpen}
+                setProgramsDialogOpen={setProgramsDialogOpen}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+            />
             
-            {/* Shortcut Grid */}
-            <div className="relative flex-1 overflow-y-auto">
-                <div className="flex flex-col gap-2 px-8 pb-8">
-                    {groupByCategory(visibleShortcuts, categories).map(([categoryId, shortcuts]) => {
-                        const category = categories.find((c) => c.id === categoryId);
-                        const title = category ? t(`categories.defaultCategories.${category.id}`, category.name) : t("categories.defaultCategories.uncategorized");
-                        return (
-                            <ShortcutGrid
-                                key={categoryId}
-                                title={title}
-                                shortcuts={shortcuts}
-                                selectedShortcuts={selectedShortcuts}
-                                tags={tags}
-                                categories={categories}
-                                onSelect={onSelect}
-                                onLaunch={handleLaunchShortcut}
-                                onRemove={handleDeleteShortcut}
-                                onUpdate={handleUpdateShortcut}
-                            />
-                        );
-                    })}
-                </div>
-                {selectedShortcuts.size > 0 && (
-                    <SelectionBadge
-                        t={t}
-                        bottom={5}
-                        selectedCount={selectedShortcuts.size}
-                        categories={categories}
-                        onClearSelection={() => setSelectedShortcuts(new Set())}
-                        onCategoryChange={onCategoryChange}
-                        onDelete={async () => {
-                            for (const id of selectedShortcuts) {
-                                await handleDeleteShortcut(id);
-                            }
-                            setSelectedShortcuts(new Set());
-                        }}
-                    />
-                )}
-            </div>
+            {/* Shortcut Groups */}
+            <ShortcutGroups
+                t={t}
+                visibleShortcuts={visibleShortcuts}
+                selectedShortcuts={selectedShortcuts}
+                setSelectedShortcuts={setSelectedShortcuts}
+                categories={categories}
+                tags={tags}
+                onSelect={onSelect}
+                onCategoryChange={onCategoryChange}
+                handleLaunchShortcut={handleLaunchShortcut}
+                handleDeleteShortcut={handleDeleteShortcut}
+                handleUpdateShortcut={handleUpdateShortcut}
+            />
 
             {/* Loading progress bar */}
             {loading && (
@@ -415,49 +289,11 @@ export default function Dashboard() {
             )}
             
             {/* Footer */}
-            <div className="flex justify-between items-center gap-4 bg-background/30 px-8 py-4">
-                <a
-                    href="https://github.com/diegocrdz/shortcuts"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border-2 border-transparent rounded-full hover:border-white transition-border duration-200"
-                >
-                    <img src="icon.png" alt="Logo" className="h-7 w-7" />
-                </a>
-                <div className="text-sm text-muted-foreground">
-                    {footerMsg}
-                </div>
-                <div className="space-x-4">
-                    <Tooltip>
-                        <TooltipTrigger>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={handleScanGames}
-                            >
-                                <RotateCcw />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            {t("shortcuts.actions.sync")}
-                        </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                        <TooltipTrigger>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => navigate("/settings")}
-                            >
-                                <Settings />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            {t("settings.title")}
-                        </TooltipContent>
-                    </Tooltip>
-                </div>
-            </div>
+            <Footer
+                t={t}
+                footerMsg={footerMsg ?? ""}
+                handleScanGames={handleScanGames}
+            />
         </div>
     );
 }

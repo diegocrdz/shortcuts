@@ -3,15 +3,18 @@
  * so scan_installed_games no longer re-adds them.
  */
 
-use crate::shortcuts::Shortcut;
 use crate::scanner::sync_shortcuts;
+use crate::shortcuts::Shortcut;
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 
 // Get the path to the excluded.json configuration file
 fn config_path(app: &AppHandle) -> PathBuf {
-    let dir = app.path().app_data_dir().expect("could not determine app data directory");
+    let dir = app
+        .path()
+        .app_data_dir()
+        .expect("could not determine app data directory");
     fs::create_dir_all(&dir).ok();
     dir.join("excluded.json")
 }

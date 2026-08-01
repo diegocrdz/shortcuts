@@ -2,11 +2,13 @@
  * Scan and detect Riot launcher and games on the system
  */
 
-use crate::shortcuts::{game_shortcut, launcher_shortcut, extract_icon_from_exe, Shortcut, SOURCE_RIOT};
+use crate::shortcuts::{
+    extract_icon_from_exe, game_shortcut, launcher_shortcut, Shortcut, SOURCE_RIOT,
+};
 use crate::utilities::find_install_location_from_uninstall;
 use serde::Deserialize;
-use std::env;
 use std::collections::HashSet;
+use std::env;
 use std::fs;
 use std::path::PathBuf;
 use tauri::AppHandle;
@@ -73,13 +75,20 @@ fn riot_client_installs() -> Option<RiotClientInstalls> {
 // preferring the live channel.
 fn riot_client_exe_from_installs() -> Option<PathBuf> {
     let installs = riot_client_installs()?;
-    let candidate = installs.rc_live.or(installs.rc_default).or(installs.rc_beta)?;
+    let candidate = installs
+        .rc_live
+        .or(installs.rc_default)
+        .or(installs.rc_beta)?;
     // Riot stores paths with forward slashes (e.g. "C:/Riot Games/Riot Client/...").
     // PathBuf::exists() tolerates that fine, but some Win32 APIs used downstream
     // (icon extraction) do not resolve them correctly, so normalize here.
     let normalized = candidate.replace('/', "\\");
     let path = PathBuf::from(normalized);
-    if path.exists() { Some(path) } else { None }
+    if path.exists() {
+        Some(path)
+    } else {
+        None
+    }
 }
 
 // Get a product's real install directory from its product_settings.yaml metadata file.
@@ -116,7 +125,12 @@ pub fn scan_riot(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcu
         .or_else(|| first_existing(riot_client_paths()));
 
     if let Some(launcher) = &client_path {
-        let mut shortcut = launcher_shortcut("launcher-riot", "Riot Client", launcher.to_string_lossy().to_string(), SOURCE_RIOT);
+        let mut shortcut = launcher_shortcut(
+            "launcher-riot",
+            "Riot Client",
+            launcher.to_string_lossy().to_string(),
+            SOURCE_RIOT,
+        );
         shortcut.icon_path = extract_icon_from_exe(app, &shortcut.target, &shortcut.id);
         results.push(shortcut);
     }
@@ -129,20 +143,28 @@ pub fn scan_riot(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcu
             "VALORANT",
             "valorant",
             "live/VALORANT.exe",
-            riot_roots().iter().map(|r| r.join("VALORANT").join("live").join("VALORANT.exe")).collect(),
+            riot_roots()
+                .iter()
+                .map(|r| r.join("VALORANT").join("live").join("VALORANT.exe"))
+                .collect(),
         ),
         (
             "League of Legends",
             "league_of_legends",
             "LeagueClient.exe",
-            riot_roots().iter().map(|r| r.join("League of Legends").join("LeagueClient.exe")).collect(),
+            riot_roots()
+                .iter()
+                .map(|r| r.join("League of Legends").join("LeagueClient.exe"))
+                .collect(),
         ),
     ];
 
     // For each Riot game, if the executable exists, create a shortcut
     for (name, patchline_id, relative_exe, fallback_candidates) in riot_products {
         let id = format!("riot-{}", name.to_lowercase().replace(' ', "-"));
-        if excluded_ids.contains(&id) { continue; } // Skip excluded shortcuts
+        if excluded_ids.contains(&id) {
+            continue;
+        } // Skip excluded shortcuts
 
         let exe = product_install_dir(patchline_id)
             .map(|install_dir| install_dir.join(relative_exe))
@@ -157,8 +179,12 @@ pub fn scan_riot(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcu
                     client.to_string_lossy().to_string(), // target = Riot Client
                     SOURCE_RIOT,
                 );
-                shortcut.args = Some(format!("--launch-product={} --launch-patchline=live", patchline_id));
-                shortcut.icon_path = extract_icon_from_exe(app, &exe.to_string_lossy(), &shortcut.id);
+                shortcut.args = Some(format!(
+                    "--launch-product={} --launch-patchline=live",
+                    patchline_id
+                ));
+                shortcut.icon_path =
+                    extract_icon_from_exe(app, &exe.to_string_lossy(), &shortcut.id);
                 results.push(shortcut);
             }
         }
@@ -168,7 +194,13 @@ pub fn scan_riot(app: &AppHandle, excluded_ids: &HashSet<String>) -> Vec<Shortcu
     // if the executable exists.
     if !excluded_ids.contains("riot-legends-of-runeterra") {
         if let Some(exe) = first_existing(
-            riot_roots().iter().map(|r| r.join("Legends of Runeterra").join("LegendsOfRuneterra.exe")).collect(),
+            riot_roots()
+                .iter()
+                .map(|r| {
+                    r.join("Legends of Runeterra")
+                        .join("LegendsOfRuneterra.exe")
+                })
+                .collect(),
         ) {
             results.push(game_shortcut(
                 "riot-legends-of-runeterra",

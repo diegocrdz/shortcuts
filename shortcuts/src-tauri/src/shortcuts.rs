@@ -2,16 +2,16 @@
  * Logic for managing shortcuts
  */
 
-use crate::excluded;
-use crate::epic_games::epic_launcher_exe;
 use crate::categories;
+use crate::epic_games::epic_launcher_exe;
+use crate::excluded;
+use base64::{engine::general_purpose, Engine as _};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
-use windows_icons::get_icon_base64_by_path;
-use base64::{Engine as _, engine::general_purpose};
 use win32_version_info::VersionInfo;
+use windows_icons::get_icon_base64_by_path;
 
 pub const SOURCE_MANUAL: &str = "manual";
 pub const SOURCE_STEAM: &str = "steam";
@@ -32,7 +32,7 @@ pub struct Shortcut {
     pub source: String,       // "manual" | "steam" | "epic" | "riot"
     pub is_favorite: bool,
     pub tags: Vec<String>, // Tags for categorization
-    pub category: String, // "launchers" | "games" | custom categories
+    pub category: String,  // "launchers" | "games" | custom categories
 }
 
 pub fn build_shortcut(

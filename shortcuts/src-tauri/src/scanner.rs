@@ -1,14 +1,14 @@
-/* 
+/*
  * Scan and detect launcher and game shortcuts from supported providers
  */
 
-use crate::shortcuts;
-use crate::shortcuts::{Shortcut, remove_shortcut_icon};
-use crate::settings::{load_settings, save_settings};
-use crate::steam::scan_steam;
 use crate::epic_games::scan_epic;
+use crate::excluded::load as load_excluded;
 use crate::riot::scan_riot;
-use crate::excluded::{load as load_excluded};
+use crate::settings::{load_settings, save_settings};
+use crate::shortcuts;
+use crate::shortcuts::{remove_shortcut_icon, Shortcut};
+use crate::steam::scan_steam;
 use std::collections::HashSet;
 use tauri::AppHandle;
 
