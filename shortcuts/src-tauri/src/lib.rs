@@ -205,7 +205,15 @@ pub fn run() {
             let window = app.get_webview_window("main").unwrap();
             let settings = settings::load_settings(app.handle());
             let _ = settings::apply_window_position(app.handle().clone(), settings.position.clone());
-            let _ = settings::apply_start_behavior(app.handle(), &settings.start_behavior);
+
+            // Only apply start behavior if auto_start is enabled
+            let launched_via_autostart = std::env::args().any(|arg| arg == "--minimized");
+
+            if launched_via_autostart {
+                let _ = settings::apply_start_behavior(app.handle(), &settings.start_behavior);
+            } else {
+                let _ = settings::apply_start_behavior(app.handle(), "normal");
+            }
 
             let auto_minimize_paused = Arc::new(AtomicBool::new(false));
             app.manage(auto_minimize_paused.clone());

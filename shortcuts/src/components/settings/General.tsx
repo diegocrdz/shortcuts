@@ -122,6 +122,7 @@ export default function GeneralSettings() {
                 <Select
                     items={START_BEHAVIOR_OPTIONS}
                     value={settings.start_behavior}
+                    disabled={!settings.auto_start}
                     onValueChange={(value) => {
                         if (value) updateSettings({ start_behavior: value });
                     }}

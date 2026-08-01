@@ -5,7 +5,6 @@
  */
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { getCurrentWindow, currentMonitor, LogicalPosition } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { Theme, Settings } from "@/types";
 import i18n from "@/i18n";
