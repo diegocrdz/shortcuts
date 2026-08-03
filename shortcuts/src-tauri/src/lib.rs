@@ -107,13 +107,20 @@ fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
 /// wait briefly (in case focus bounces back) then minimize it — unless paused.
 fn setup_auto_minimize(app_handle: AppHandle, window: &WebviewWindow, paused: Arc<AtomicBool>) {
     let focus_epoch = Arc::new(AtomicU64::new(0));
+    let last_focus_time = Arc::new(std::sync::Mutex::new(std::time::Instant::now()));
 
     window.on_window_event(move |event| match event {
         tauri::WindowEvent::Focused(true) => {
             focus_epoch.fetch_add(1, Ordering::SeqCst);
+            *last_focus_time.lock().unwrap() = std::time::Instant::now();
         }
         tauri::WindowEvent::Focused(false) => {
             if paused.load(Ordering::SeqCst) {
+                return;
+            }
+
+            let elapsed = last_focus_time.lock().unwrap().elapsed();
+            if elapsed < std::time::Duration::from_millis(400) {
                 return;
             }
 

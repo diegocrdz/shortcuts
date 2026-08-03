@@ -171,9 +171,11 @@ pub fn apply_start_behavior(app: &AppHandle, start_behavior: &str) -> Result<(),
 
     match start_behavior {
         "hidden" => {
+            window.show().map_err(|e| e.to_string())?;
             window.hide().map_err(|e| e.to_string())?;
         }
         "minimized" => {
+            window.show().map_err(|e| e.to_string())?;
             window.minimize().map_err(|e| e.to_string())?;
         }
         _ => {
